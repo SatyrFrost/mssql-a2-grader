@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { ConnectionPool } from "https://deno.land/x/deno_mssql@1.0.0/mod.ts"; // Import deno-mssql
+import { ConnectionPool } from "https://esm.sh/deno-mssql@1.0.0/mod.ts"; // Changed import to esm.sh
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
