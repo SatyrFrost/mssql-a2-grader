@@ -1,20 +1,51 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-// Removed external MS SQL driver import
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Placeholder for MS SQL query execution.
-// This function will need to be replaced with Dyad's specific mechanism for running MS SQL queries.
+/**
+ * Executes an MS SQL query by making a fetch call to a Dyad-provided internal service.
+ * This function assumes Dyad exposes an endpoint for executing MS SQL queries.
+ * The service is expected to return results in a format like { columns: string[], values: any[][] } for SELECT
+ * queries, and { status: 'success' } or similar for non-SELECT (DDL/DML) queries.
+ */
 async function executeMsSqlQuery(sqlQuery: string) {
-  // In a Dyad-managed MS SQL environment, this would typically involve
-  // calling an internal Dyad service or a specific API.
-  // For now, we'll return an error to indicate that the actual execution
-  // mechanism needs to be implemented based on Dyad's capabilities.
-  console.warn("MS SQL execution placeholder called. Actual MS SQL execution logic needs to be implemented.");
-  return { error: "MS SQL execution not yet implemented in this environment. Please consult Dyad's documentation or support for running MS SQL queries." };
+  // This environment variable needs to be configured in your Supabase project settings.
+  // It should point to the URL of Dyad's internal MS SQL execution service.
+  const DYAD_MS_SQL_EXECUTION_ENDPOINT = Deno.env.get('DYAD_MS_SQL_EXECUTION_ENDPOINT'); 
+
+  if (!DYAD_MS_SQL_EXECUTION_ENDPOINT) {
+    return { error: "DYAD_MS_SQL_EXECUTION_ENDPOINT environment variable is not set. Please configure it with the URL of Dyad's internal MS SQL execution service." };
+  }
+
+  try {
+    const response = await fetch(DYAD_MS_SQL_EXECUTION_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // If Dyad's internal service requires authentication (e.g., an API key),
+        // you would add it here, potentially from another environment variable.
+        // Example: 'Authorization': `Bearer ${Deno.env.get('DYAD_INTERNAL_API_KEY')}`
+      },
+      body: JSON.stringify({ sql: sqlQuery }),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      // Assuming the Dyad service returns an error object on failure
+      return { error: responseData.message || `Dyad MS SQL service error: ${response.statusText}` };
+    }
+
+    // The service is expected to return { columns: string[], values: any[][] } for SELECT
+    // and { status: 'success' } or similar for non-SELECT queries.
+    return responseData; 
+
+  } catch (err: any) {
+    return { error: `Failed to communicate with Dyad MS SQL service: ${err.message}` };
+  }
 }
 
 serve(async (req) => {
@@ -58,7 +89,7 @@ serve(async (req) => {
     // Execute initial setup SQL
     const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
     for (const stmt of initialSetupStatements) {
-      const setupResult = await executeMsSqlQuery(stmt.sql); // Using the placeholder function
+      const setupResult = await executeMsSqlQuery(stmt.sql);
       if (setupResult && (setupResult as any).error) {
         console.error('Initial setup error:', setupResult);
         return new Response(JSON.stringify({ error: 'Failed to set up initial database schema.', details: setupResult }), {
@@ -81,11 +112,11 @@ serve(async (req) => {
       let modelResult = null;
 
       if (studentQuery) {
-        studentResult = await executeMsSqlQuery(studentQuery.sql); // Using the placeholder function
+        studentResult = await executeMsSqlQuery(studentQuery.sql);
       }
 
       if (modelQuery) {
-        modelResult = await executeMsSqlQuery(modelQuery.sql); // Using the placeholder function
+        modelResult = await executeMsSqlQuery(modelQuery.sql);
       }
 
       results.push({
