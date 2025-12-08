@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { ConnectionPool } from "https://esm.sh/deno-mssql@1.0.0/mod.ts"; // Changed import to esm.sh
+import sql from "https://esm.sh/npm:mssql@10.0.1"; // Using npm:mssql via esm.sh
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // Helper to execute MS SQL queries
-async function executeMsSqlQuery(pool: ConnectionPool, sqlQuery: string) {
+async function executeMsSqlQuery(pool: sql.ConnectionPool, sqlQuery: string) {
   try {
     const request = pool.request();
     // Check if it's a SELECT query
@@ -33,7 +33,7 @@ serve(async (req) => {
     const { studentSql, modelAnswersSql, initialSqlSetup } = await req.json();
 
     // Get MS SQL Server connection details from environment variables
-    const mssqlConfig = {
+    const mssqlConfig: sql.config = {
       server: Deno.env.get('MSSQL_SERVER') ?? '',
       database: Deno.env.get('MSSQL_DATABASE') ?? '',
       user: Deno.env.get('MSSQL_USER') ?? '',
@@ -42,6 +42,11 @@ serve(async (req) => {
         encrypt: false, // Use true for Azure SQL Database, false for local SQL Server
         trustServerCertificate: true, // Change to false for production with valid SSL cert
       },
+      pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+      }
     };
 
     if (!mssqlConfig.server || !mssqlConfig.database || !mssqlConfig.user || !mssqlConfig.password) {
@@ -51,7 +56,7 @@ serve(async (req) => {
       });
     }
 
-    const pool = new ConnectionPool(mssqlConfig);
+    const pool = new sql.ConnectionPool(mssqlConfig);
     await pool.connect();
 
     // Helper to split SQL into individual statements, handling --Q comments and GO
