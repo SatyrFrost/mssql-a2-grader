@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import AssignmentGrader from "./pages/AssignmentGrader"; // Import the new page
+import AssignmentGrader from "./pages/AssignmentGrader";
 
 const queryClient = new QueryClient();
 
@@ -16,8 +16,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/grade" element={<AssignmentGrader />} /> {/* New route */}
+          <Route path="/" element={<AssignmentGrader />} /> {/* AssignmentGrader is now the default */}
+          <Route path="/index" element={<Index />} /> {/* Old Index page moved to /index */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
