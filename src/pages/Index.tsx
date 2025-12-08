@@ -1,6 +1,6 @@
 import { MadeWithDyad } from "@/components/made-with-dyad";
-import { Link } from "react-router-dom"; // Import Link
-import { Button } from "@/components/ui/button"; // Import Button
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   return (
@@ -10,9 +10,14 @@ const Index = () => {
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
           Upload student assignments and compare them against model answers.
         </p>
-        <Link to="/grade">
-          <Button className="px-8 py-4 text-lg">Go to Assignment Grader</Button>
-        </Link>
+        <div className="flex flex-col space-y-4">
+          <Link to="/grade">
+            <Button className="px-8 py-4 text-lg">Go to Assignment Grader</Button>
+          </Link>
+          <Link to="/sql-question">
+            <Button variant="outline" className="px-8 py-4 text-lg">Try SQL Editor</Button>
+          </Link>
+        </div>
       </div>
       <MadeWithDyad />
     </div>
