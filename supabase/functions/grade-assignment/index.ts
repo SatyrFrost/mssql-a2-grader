@@ -1,27 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import sql from "https://esm.sh/npm:mssql@10.0.1"; // Using npm:mssql via esm.sh
+// Removed external MS SQL driver import
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper to execute MS SQL queries
-async function executeMsSqlQuery(pool: sql.ConnectionPool, sqlQuery: string) {
-  try {
-    const request = pool.request();
-    // Check if it's a SELECT query
-    if (sqlQuery.trim().toUpperCase().startsWith('SELECT')) {
-      const result = await request.query(sqlQuery);
-      return result.recordset; // Return the data rows
-    } else {
-      // For non-SELECT queries (INSERT, UPDATE, DELETE, DDL, etc.)
-      await request.query(sqlQuery);
-      return { status: 'success', message: 'Query executed successfully.' };
-    }
-  } catch (err: any) {
-    return { error: err.message, sqlstate: err.code || 'UNKNOWN_SQLSTATE' };
-  }
+// Placeholder for MS SQL query execution.
+// This function will need to be replaced with Dyad's specific mechanism for running MS SQL queries.
+async function executeMsSqlQuery(sqlQuery: string) {
+  // In a Dyad-managed MS SQL environment, this would typically involve
+  // calling an internal Dyad service or a specific API.
+  // For now, we'll return an error to indicate that the actual execution
+  // mechanism needs to be implemented based on Dyad's capabilities.
+  console.warn("MS SQL execution placeholder called. Actual MS SQL execution logic needs to be implemented.");
+  return { error: "MS SQL execution not yet implemented in this environment. Please consult Dyad's documentation or support for running MS SQL queries." };
 }
 
 serve(async (req) => {
@@ -31,33 +24,6 @@ serve(async (req) => {
 
   try {
     const { studentSql, modelAnswersSql, initialSqlSetup } = await req.json();
-
-    // Get MS SQL Server connection details from environment variables
-    const mssqlConfig: sql.config = {
-      server: Deno.env.get('MSSQL_SERVER') ?? '',
-      database: Deno.env.get('MSSQL_DATABASE') ?? '',
-      user: Deno.env.get('MSSQL_USER') ?? '',
-      password: Deno.env.get('MSSQL_PASSWORD') ?? '',
-      options: {
-        encrypt: false, // Use true for Azure SQL Database, false for local SQL Server
-        trustServerCertificate: true, // Change to false for production with valid SSL cert
-      },
-      pool: {
-        max: 10,
-        min: 0,
-        idleTimeoutMillis: 30000
-      }
-    };
-
-    if (!mssqlConfig.server || !mssqlConfig.database || !mssqlConfig.user || !mssqlConfig.password) {
-      return new Response(JSON.stringify({ error: 'Missing MS SQL Server connection environment variables.' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      });
-    }
-
-    const pool = new sql.ConnectionPool(mssqlConfig);
-    await pool.connect();
 
     // Helper to split SQL into individual statements, handling --Q comments and GO
     const splitMsSqlStatements = (sqlContent: string) => {
@@ -92,10 +58,9 @@ serve(async (req) => {
     // Execute initial setup SQL
     const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
     for (const stmt of initialSetupStatements) {
-      const setupResult = await executeMsSqlQuery(pool, stmt.sql);
+      const setupResult = await executeMsSqlQuery(stmt.sql); // Using the placeholder function
       if (setupResult && (setupResult as any).error) {
         console.error('Initial setup error:', setupResult);
-        await pool.close();
         return new Response(JSON.stringify({ error: 'Failed to set up initial database schema.', details: setupResult }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500,
@@ -116,11 +81,11 @@ serve(async (req) => {
       let modelResult = null;
 
       if (studentQuery) {
-        studentResult = await executeMsSqlQuery(pool, studentQuery.sql);
+        studentResult = await executeMsSqlQuery(studentQuery.sql); // Using the placeholder function
       }
 
       if (modelQuery) {
-        modelResult = await executeMsSqlQuery(pool, modelQuery.sql);
+        modelResult = await executeMsSqlQuery(modelQuery.sql); // Using the placeholder function
       }
 
       results.push({
@@ -135,8 +100,6 @@ serve(async (req) => {
         },
       });
     }
-
-    await pool.close();
 
     return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
