@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { markingSchedule } from "@/data/markingSchedule"; // Import the parsed marking schedule
 
 interface QueryResult {
   question: string;
@@ -23,6 +24,11 @@ interface QueryResult {
     sql: string;
     result: any;
   };
+  grade?: {
+    score: number;
+    maxScore: number;
+    feedback: string[];
+  };
 }
 
 const AssignmentGrader = () => {
@@ -30,6 +36,62 @@ const AssignmentGrader = () => {
   const [fileName, setFileName] = useState<string>("");
   const [gradingResults, setGradingResults] = useState<QueryResult[] | null>(null);
   const [isGrading, setIsGrading] = useState<boolean>(false);
+  const [totalScore, setTotalScore] = useState<number>(0);
+  const [totalMaxScore, setTotalMaxScore] = useState<number>(0);
+
+  // Function to calculate grade for a single question
+  const calculateQuestionGrade = (
+    questionId: string,
+    studentSql: string,
+    modelSql: string,
+    studentResult: any,
+    modelResult: any
+  ): { score: number; maxScore: number; feedback: string[] } => {
+    let score = 0;
+    let maxScore = 0;
+    const feedback: string[] = [];
+    const questionMarking = markingSchedule[questionId];
+
+    if (!questionMarking) {
+      feedback.push(`No marking schedule found for ${questionId}.`);
+      return { score: 0, maxScore: 0, feedback };
+    }
+
+    const studentSqlLower = studentSql.toLowerCase();
+    const modelSqlLower = modelSql.toLowerCase(); // For potential comparison
+
+    for (const [keyword, points] of Object.entries(questionMarking)) {
+      maxScore += points;
+      const keywordLower = keyword.toLowerCase();
+
+      if (keyword === '[labels]') {
+        // For labels, assume correct if student's SELECT query hash matches model's
+        // This is a proxy for "output correctness" given the mock execution.
+        if (studentResult?.hash && modelResult?.hash && studentResult.hash === modelResult.hash) {
+          score += points;
+          feedback.push(`+${points} for correct labels (implied by matching query hash).`);
+        } else {
+          feedback.push(`-0 for labels (query hash mismatch or not applicable).`);
+        }
+      } else if (studentSqlLower.includes(keywordLower)) {
+        score += points;
+        feedback.push(`+${points} for '${keyword}'.`);
+      } else {
+        feedback.push(`-0 for missing '${keyword}'.`);
+      }
+    }
+
+    // Add a general feedback for SELECT query hash comparison
+    if (studentResult?.hash && modelResult?.hash) {
+      if (studentResult.hash === modelResult.hash) {
+        feedback.push("Overall SELECT query structure/content (simulated by hash) matches model's.");
+      } else {
+        feedback.push("Overall SELECT query structure/content (simulated by hash) does NOT match model's.");
+      }
+    }
+
+    return { score, maxScore, feedback };
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -41,6 +103,8 @@ const AssignmentGrader = () => {
         setStudentSql(content);
         showSuccess("Student SQL file uploaded successfully!");
         setGradingResults(null); // Clear previous results on new upload
+        setTotalScore(0);
+        setTotalMaxScore(0);
       };
       reader.onerror = () => {
         showError("Failed to read student SQL file.");
@@ -57,6 +121,8 @@ const AssignmentGrader = () => {
     
     setIsGrading(true);
     setGradingResults(null); // Clear previous results
+    setTotalScore(0);
+    setTotalMaxScore(0);
     
     try {
       console.log("Calling edge function with payload sizes:", {
@@ -94,7 +160,30 @@ const AssignmentGrader = () => {
         }
       } else {
         showSuccess("Assignment graded successfully!");
-        setGradingResults(data.results);
+        const gradedResults = data.results.map((item: QueryResult) => {
+          const questionId = item.question.split(' ')[0]; // Extract Q1, Q2 etc.
+          const grade = calculateQuestionGrade(
+            questionId,
+            item.student.sql,
+            item.model.sql,
+            item.student.result,
+            item.model.result
+          );
+          return { ...item, grade };
+        });
+        setGradingResults(gradedResults);
+
+        // Calculate total score
+        let currentTotalScore = 0;
+        let currentTotalMaxScore = 0;
+        gradedResults.forEach((item: QueryResult) => {
+          if (item.grade) {
+            currentTotalScore += item.grade.score;
+            currentTotalMaxScore += item.grade.maxScore;
+          }
+        });
+        setTotalScore(currentTotalScore);
+        setTotalMaxScore(currentTotalMaxScore);
       }
     } catch (error: any) {
       console.error("Client-side grading error:", error);
@@ -133,6 +222,16 @@ const AssignmentGrader = () => {
       return <p className="text-green-600 text-sm">Query executed successfully.</p>;
     }
     
+    // Display hash for SELECT queries
+    if (result.hash) {
+      return (
+        <div className="text-sm">
+          <p>Query Hash: <code className="font-mono text-xs">{result.hash.substring(0, 10)}...</code></p>
+          <p className="text-muted-foreground">Simulated output based on query content.</p>
+        </div>
+      );
+    }
+
     if (Array.isArray(result)) {
       if (result.length === 0) {
         return <p className="text-muted-foreground">No rows returned.</p>;
@@ -198,12 +297,36 @@ const AssignmentGrader = () => {
         {gradingResults && (
           <Card>
             <CardHeader>
-              <CardTitle>Grading Results</CardTitle>
+              <CardTitle className="flex justify-between items-center">
+                Grading Results
+                <Badge variant="default" className="text-lg px-4 py-2">
+                  Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)}
+                </Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {gradingResults.map((item, index) => (
                 <div key={index} className="border p-4 rounded-md bg-muted/20">
-                  <h3 className="text-lg font-semibold mb-2">{item.question}</h3>
+                  <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
+                    {item.question}
+                    {item.grade && (
+                      <Badge variant="outline" className="text-md px-3 py-1">
+                        Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
+                      </Badge>
+                    )}
+                  </h3>
+                  
+                  {item.grade && (
+                    <div className="mb-4">
+                      <h4 className="font-medium text-md mb-1">Feedback:</h4>
+                      <ul className="list-disc list-inside text-sm text-muted-foreground">
+                        {item.grade.feedback.map((f, i) => (
+                          <li key={i}>{f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-medium flex items-center gap-2">

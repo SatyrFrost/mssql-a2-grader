@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createHash } from "https://deno.land/std@0.190.0/hash/mod.ts"; // Import createHash
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,41 +7,45 @@ const corsHeaders = {
 };
 
 /**
- * Mock SQL execution function for testing purposes
- * In a real implementation, this would connect to an MS SQL database
+ * Simulates MS SQL query execution.
+ * For SELECT queries, it returns a hash of the query for comparison.
+ * For other queries, it returns a success status.
  */
 async function executeMsSqlQuery(sqlQuery: string) {
   // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, 50));
   
   try {
-    // Basic validation
     if (!sqlQuery || sqlQuery.trim().length === 0) {
       return { error: "Empty SQL query provided" };
     }
     
-    // Mock response based on query type
     const trimmedQuery = sqlQuery.trim().toLowerCase();
     
     if (trimmedQuery.startsWith('select')) {
-      // Mock SELECT response
+      // For SELECT queries, return a hash of the query for comparison
+      const hash = createHash("sha256");
+      hash.update(sqlQuery);
+      const queryHash = hash.toString('hex'); // Get hex string of the hash
+
+      // Return mock columns/values for display, and the hash for comparison
       return {
-        columns: ['ID', 'Name', 'Value'],
-        values: [
-          [1, 'Test1', 100],
-          [2, 'Test2', 200],
-          [3, 'Test3', 300]
-        ]
+        columns: ['QueryHash', 'SimulatedOutput'],
+        values: [[queryHash, 'Mock data based on query hash']],
+        hash: queryHash // Include hash for easier comparison
       };
     } else if (trimmedQuery.startsWith('insert') || trimmedQuery.startsWith('update') || trimmedQuery.startsWith('delete')) {
-      // Mock DML response
       return { status: 'success', rowsAffected: 1 };
-    } else {
-      // Mock DDL response
+    } else if (trimmedQuery.startsWith('create') || trimmedQuery.startsWith('drop') || trimmedQuery.startsWith('alter')) {
       return { status: 'success' };
+    } else if (trimmedQuery.startsWith('exec') || trimmedQuery.startsWith('go') || trimmedQuery.startsWith('declare') || trimmedQuery.startsWith('print')) {
+      // For stored procedures, functions, etc., just return success for now
+      return { status: 'success', message: 'Procedure/Function executed (mock)' };
+    } else {
+      return { status: 'success' }; // Default for other statements
     }
   } catch (err: any) {
-    return { error: `Query execution failed: ${err.message}` };
+    return { error: `Mock query execution failed: ${err.message}` };
   }
 }
 
@@ -58,7 +63,7 @@ serve(async (req) => {
       initialSqlSetupLength: initialSqlSetup?.length || 0
     });
 
-    // Helper to split SQL into individual statements, handling --Q comments
+    // Helper to split SQL into individual statements, handling --Q comments and GO
     const splitMsSqlStatements = (sqlContent: string) => {
       if (!sqlContent) return [];
       
@@ -99,19 +104,6 @@ serve(async (req) => {
       
       return statements;
     };
-
-    // Validate inputs
-    if (!studentSql && !modelAnswersSql) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Either student SQL or model answers SQL must be provided'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        }
-      );
-    }
 
     // Process initial setup if provided
     if (initialSqlSetup) {
