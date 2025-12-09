@@ -39,6 +39,13 @@ const AssignmentGrader = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const [totalMaxScore, setTotalMaxScore] = useState<number>(0);
 
+  // Helper function to count occurrences of a keyword in SQL
+  const countKeywordOccurrences = (sql: string, keyword: string): number => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+    const matches = sql.match(regex);
+    return matches ? matches.length : 0;
+  };
+
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
     questionId: string,
@@ -58,7 +65,7 @@ const AssignmentGrader = () => {
     }
 
     const studentSqlLower = studentSql.toLowerCase();
-    const modelSqlLower = modelSql.toLowerCase(); // For potential comparison
+    // const modelSqlLower = modelSql.toLowerCase(); // Not directly used for keyword matching, but kept for context
 
     for (const [keyword, points] of Object.entries(questionMarking)) {
       maxScore += points;
@@ -72,6 +79,24 @@ const AssignmentGrader = () => {
           feedback.push(`+${points} for correct labels (implied by matching query hash).`);
         } else {
           feedback.push(`-0 for labels (query hash mismatch or not applicable).`);
+        }
+      } else if (keyword.startsWith('JOIN ')) {
+        const joinNumber = parseInt(keyword.split(' ')[1]);
+        const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+        if (joinCount >= joinNumber) {
+          score += points;
+          feedback.push(`+${points} for including at least ${joinNumber} 'JOIN' clause(s).`);
+        } else {
+          feedback.push(`-0 for missing the ${joinNumber}${joinNumber === 1 ? 'st' : joinNumber === 2 ? 'nd' : 'th'} 'JOIN' clause.`);
+        }
+      } else if (keyword.startsWith('AND ')) {
+        const andNumber = parseInt(keyword.split(' ')[1]);
+        const andCount = countKeywordOccurrences(studentSqlLower, 'and');
+        if (andCount >= andNumber) {
+          score += points;
+          feedback.push(`+${points} for including at least ${andNumber} 'AND' clause(s).`);
+        } else {
+          feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
         }
       } else if (studentSqlLower.includes(keywordLower)) {
         score += points;
