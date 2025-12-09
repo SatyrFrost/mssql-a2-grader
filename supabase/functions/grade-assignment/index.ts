@@ -1,10 +1,22 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createHash } from "https://deno.land/std@0.190.0/hash/mod.ts"; // Import createHash
+// Correct import for crypto in Deno
+import { crypto } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+/**
+ * Creates a SHA-256 hash of a string
+ */
+async function createHash(message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 /**
  * Simulates MS SQL query execution.
@@ -24,9 +36,7 @@ async function executeMsSqlQuery(sqlQuery: string) {
     
     if (trimmedQuery.startsWith('select')) {
       // For SELECT queries, return a hash of the query for comparison
-      const hash = createHash("sha256");
-      hash.update(sqlQuery);
-      const queryHash = hash.toString('hex'); // Get hex string of the hash
+      const queryHash = await createHash(sqlQuery);
 
       // Return mock columns/values for display, and the hash for comparison
       return {
@@ -68,7 +78,8 @@ serve(async (req) => {
       if (!sqlContent) return [];
       
       const statements: { question: string; sql: string }[] = [];
-      const blocks = sqlContent.split(/(?:\r?\n|\r)GO(?:\r?\n|\r|$)/i);
+      // Split by GO statements first
+      const blocks = sqlContent.split(/(?:\r?\n)GO(?:\r?\n)/i);
       
       let questionCounter = 1;
       
@@ -80,23 +91,32 @@ serve(async (req) => {
         for (const line of lines) {
           const trimmedLine = line.trim();
           
+          // Check if line starts with --Q followed by content (handles --Q1, --Q2, etc.)
           if (trimmedLine.startsWith('--Q')) {
+            // If we already have a question being built, save it
             if (currentQuestion && currentSqlBlock.length > 0) {
               statements.push({
                 question: currentQuestion,
                 sql: currentSqlBlock.join('\n').trim()
               });
             }
-            currentQuestion = trimmedLine;
+            // Start new question
+            currentQuestion = trimmedLine; // This will be --Q1, --Q2, etc.
             currentSqlBlock = [];
           } else if (trimmedLine && !trimmedLine.startsWith('--')) {
+            // Add non-comment, non-empty lines to current SQL block
             currentSqlBlock.push(line);
           }
         }
         
+        // Don't forget the last statement in the block
         if (currentSqlBlock.length > 0) {
+          // If no question marker was found in this block, assign a default one
+          if (!currentQuestion) {
+            currentQuestion = `Question ${questionCounter++}`;
+          }
           statements.push({
-            question: currentQuestion || `Question ${questionCounter++}`,
+            question: currentQuestion,
             sql: currentSqlBlock.join('\n').trim()
           });
         }

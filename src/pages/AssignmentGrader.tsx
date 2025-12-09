@@ -161,7 +161,10 @@ const AssignmentGrader = () => {
       } else {
         showSuccess("Assignment graded successfully!");
         const gradedResults = data.results.map((item: QueryResult) => {
-          const questionId = item.question.split(' ')[0]; // Extract Q1, Q2 etc.
+          // Extract question ID like "Q1", "Q2", etc. from "--Q1", "--Q2", etc.
+          const questionIdMatch = item.question.match(/--(Q\d+)/);
+          const questionId = questionIdMatch ? questionIdMatch[1] : item.question; // Fallback to full question text if no match
+          
           const grade = calculateQuestionGrade(
             questionId,
             item.student.sql,
