@@ -1,7 +1,7 @@
 "use client";
 
-import initSqlJs, { Database, SqlJsStatic } from "sql.js";
-import sqlWasm from "@sql.js/wasm/sql-wasm.wasm?url";
+import { initSqlJs, Database, SqlJsStatic } from "sql.js";
+import sqlWasm from "@sqlite.org/sqlite-wasm/sqlite-wasm.wasm?url"; // Corrected path
 
 let SQL: SqlJsStatic | null = null;
 let db: Database | null = null;
