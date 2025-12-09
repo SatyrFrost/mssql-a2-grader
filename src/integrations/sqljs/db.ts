@@ -1,7 +1,9 @@
+// db.ts
 "use client";
 
-import { initSqlJs, Database, SqlJsStatic } from "sql.js";
-import sqlWasm from "@sqlite.org/sqlite-wasm/sqlite-wasm.wasm?url"; // Corrected path
+import { initSqlJs, Database, SqlJsStatic } from "sql.js"; // 1. Named import
+const sqlWasm = "/sqlite3.wasm"; // 2. Static asset path for the correct file name
+
 
 let SQL: SqlJsStatic | null = null;
 let db: Database | null = null;

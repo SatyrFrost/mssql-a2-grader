@@ -14,10 +14,12 @@ const corsHeaders = {
 async function executeMsSqlQuery(sqlQuery: string) {
   // This environment variable needs to be configured in your Supabase project settings.
   // It should point to the URL of Dyad's internal MS SQL execution service.
-  const DYAD_MS_SQL_EXECUTION_ENDPOINT = Deno.env.get('DYAD_MS_SQL_EXECUTION_ENDPOINT'); 
-
+  const DYAD_MS_SQL_EXECUTION_ENDPOINT = Deno.env.get('DYAD_MS_SQL_EXECUTION_ENDPOINT');
+  
   if (!DYAD_MS_SQL_EXECUTION_ENDPOINT) {
-    return { error: "DYAD_MS_SQL_EXECUTION_ENDPOINT environment variable is not set. Please configure it with the URL of Dyad's internal MS SQL execution service." };
+    return { 
+      error: "DYAD_MS_SQL_EXECUTION_ENDPOINT environment variable is not set. Please configure it with the URL of Dyad's internal MS SQL execution service." 
+    };
   }
 
   try {
@@ -36,15 +38,18 @@ async function executeMsSqlQuery(sqlQuery: string) {
 
     if (!response.ok) {
       // Assuming the Dyad service returns an error object on failure
-      return { error: responseData.message || `Dyad MS SQL service error: ${response.statusText}` };
+      return { 
+        error: responseData.message || `Dyad MS SQL service error: ${response.statusText}` 
+      };
     }
 
     // The service is expected to return { columns: string[], values: any[][] } for SELECT
     // and { status: 'success' } or similar for non-SELECT queries.
-    return responseData; 
-
+    return responseData;
   } catch (err: any) {
-    return { error: `Failed to communicate with Dyad MS SQL service: ${err.message}` };
+    return { 
+      error: `Failed to communicate with Dyad MS SQL service: ${err.message}` 
+    };
   }
 }
 
@@ -60,18 +65,23 @@ serve(async (req) => {
     const splitMsSqlStatements = (sqlContent: string) => {
       const statements: { question: string; sql: string }[] = [];
       const blocks = sqlContent.split(/(?:\r?\n|\r)GO(?:\r?\n|\r|$)/i); // Split by GO keyword
+      
       let questionCounter = 1;
-
+      
       for (const block of blocks) {
         const lines = block.split('\n');
         let currentQuestion = '';
         let currentSqlBlock: string[] = [];
-
+        
         for (const line of lines) {
           const trimmedLine = line.trim();
+          
           if (trimmedLine.startsWith('--Q')) {
             if (currentQuestion && currentSqlBlock.length > 0) {
-              statements.push({ question: currentQuestion, sql: currentSqlBlock.join('\n').trim() });
+              statements.push({
+                question: currentQuestion,
+                sql: currentSqlBlock.join('\n').trim()
+              });
             }
             currentQuestion = trimmedLine;
             currentSqlBlock = [];
@@ -79,23 +89,36 @@ serve(async (req) => {
             currentSqlBlock.push(line);
           }
         }
+        
         if (currentSqlBlock.length > 0) {
-          statements.push({ question: currentQuestion || `Question ${questionCounter++}`, sql: currentSqlBlock.join('\n').trim() });
+          statements.push({
+            question: currentQuestion || `Question ${questionCounter++}`,
+            sql: currentSqlBlock.join('\n').trim()
+          });
         }
       }
+      
       return statements;
     };
 
     // Execute initial setup SQL
     const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
+    
     for (const stmt of initialSetupStatements) {
       const setupResult = await executeMsSqlQuery(stmt.sql);
+      
       if (setupResult && (setupResult as any).error) {
         console.error('Initial setup error:', setupResult);
-        return new Response(JSON.stringify({ error: 'Failed to set up initial database schema.', details: setupResult }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500,
-        });
+        return new Response(
+          JSON.stringify({ 
+            error: 'Failed to set up initial database schema.',
+            details: setupResult 
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+          }
+        );
       }
     }
 
@@ -103,22 +126,22 @@ serve(async (req) => {
     const modelQueries = splitMsSqlStatements(modelAnswersSql);
 
     const results: any[] = [];
-
+    
     for (let i = 0; i < Math.max(studentQueries.length, modelQueries.length); i++) {
       const studentQuery = studentQueries[i];
       const modelQuery = modelQueries[i];
-
+      
       let studentResult = null;
       let modelResult = null;
-
+      
       if (studentQuery) {
         studentResult = await executeMsSqlQuery(studentQuery.sql);
       }
-
+      
       if (modelQuery) {
         modelResult = await executeMsSqlQuery(modelQuery.sql);
       }
-
+      
       results.push({
         question: studentQuery?.question || modelQuery?.question || `Question ${i + 1}`,
         student: {
@@ -132,16 +155,21 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ results }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-
-  } catch (error) {
+    return new Response(
+      JSON.stringify({ results }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+  } catch (error: any) {
     console.error('Edge Function error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
   }
 });
