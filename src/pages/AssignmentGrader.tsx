@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -55,11 +54,17 @@ const AssignmentGrader = () => {
       showError("Please upload a student SQL file before grading.");
       return;
     }
-
+    
     setIsGrading(true);
     setGradingResults(null); // Clear previous results
-
+    
     try {
+      console.log("Calling edge function with payload sizes:", {
+        studentSqlLength: studentSql.length,
+        modelAnswersSqlLength: modelAnswersSql.length,
+        initialSqlSetupLength: initialSqlSetup.length
+      });
+      
       const { data, error } = await supabase.functions.invoke('grade-assignment', {
         body: {
           studentSql,
@@ -69,24 +74,41 @@ const AssignmentGrader = () => {
       });
 
       if (error) {
-        showError(`Grading failed: ${error.message}`);
         console.error("Edge Function error:", error);
-        setGradingResults([{
-          question: "Overall Grading Error",
-          student: { sql: studentSql, result: { error: error.message } },
-          model: { sql: modelAnswersSql, result: { error: "N/A" } }
-        }]);
+        showError(`Grading failed: ${error.message}`);
+        // Still show results if we have them
+        if (data && data.results) {
+          setGradingResults(data.results);
+        } else {
+          setGradingResults([{
+            question: "Overall Grading Error",
+            student: {
+              sql: studentSql,
+              result: { error: error.message }
+            },
+            model: {
+              sql: modelAnswersSql,
+              result: { error: "N/A" }
+            }
+          }]);
+        }
       } else {
         showSuccess("Assignment graded successfully!");
         setGradingResults(data.results);
       }
     } catch (error: any) {
-      showError(`An unexpected error occurred: ${error.message}`);
       console.error("Client-side grading error:", error);
+      showError(`An unexpected error occurred: ${error.message}`);
       setGradingResults([{
         question: "Overall Grading Error",
-        student: { sql: studentSql, result: { error: error.message } },
-        model: { sql: modelAnswersSql, result: { error: "N/A" } }
+        student: {
+          sql: studentSql,
+          result: { error: error.message }
+        },
+        model: {
+          sql: modelAnswersSql,
+          result: { error: "N/A" }
+        }
       }]);
     } finally {
       setIsGrading(false);
@@ -97,6 +119,7 @@ const AssignmentGrader = () => {
     if (result === null) {
       return <p className="text-muted-foreground">No query executed or result available.</p>;
     }
+    
     if (result.error) {
       return (
         <div className="text-red-500 text-sm">
@@ -105,19 +128,23 @@ const AssignmentGrader = () => {
         </div>
       );
     }
+    
     if (result.status === 'success') {
       return <p className="text-green-600 text-sm">Query executed successfully.</p>;
     }
+    
     if (Array.isArray(result)) {
       if (result.length === 0) {
         return <p className="text-muted-foreground">No rows returned.</p>;
       }
+      
       return (
         <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background">
           <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
         </ScrollArea>
       );
     }
+    
     return (
       <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background">
         <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
@@ -129,7 +156,7 @@ const AssignmentGrader = () => {
     <ScrollArea className="h-screen w-full p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment Grader</h1>
-
+        
         <Card>
           <CardHeader>
             <CardTitle>Upload Student SQL File</CardTitle>
@@ -149,6 +176,7 @@ const AssignmentGrader = () => {
                 hover:file:bg-primary/90"
             />
             {fileName && <p className="text-sm text-muted-foreground">Uploaded: {fileName}</p>}
+            
             <Textarea
               placeholder="Student's SQL will appear here after upload..."
               value={studentSql}
@@ -156,7 +184,12 @@ const AssignmentGrader = () => {
               rows={15}
               className="font-mono text-sm"
             />
-            <Button onClick={handleGradeAssignment} className="w-full" disabled={isGrading}>
+            
+            <Button 
+              onClick={handleGradeAssignment} 
+              className="w-full" 
+              disabled={isGrading}
+            >
               {isGrading ? "Grading..." : "Grade Assignment"}
             </Button>
           </CardContent>
@@ -174,25 +207,31 @@ const AssignmentGrader = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-medium flex items-center gap-2">
-                        Student's Output <Badge variant="secondary">Query {index + 1}</Badge>
+                        Student's Output
+                        <Badge variant="secondary">Query {index + 1}</Badge>
                       </h4>
                       {renderResult(item.student.result)}
+                      
                       <h5 className="font-medium mt-2">Student's SQL:</h5>
                       <ScrollArea className="h-20 w-full border rounded-md p-2 bg-background">
                         <pre className="text-xs whitespace-pre-wrap">{item.student.sql}</pre>
                       </ScrollArea>
                     </div>
+                    
                     <div>
                       <h4 className="font-medium flex items-center gap-2">
-                        Model Answer Output <Badge variant="secondary">Query {index + 1}</Badge>
+                        Model Answer Output
+                        <Badge variant="secondary">Query {index + 1}</Badge>
                       </h4>
                       {renderResult(item.model.result)}
+                      
                       <h5 className="font-medium mt-2">Model Answer SQL:</h5>
                       <ScrollArea className="h-20 w-full border rounded-md p-2 bg-background">
                         <pre className="text-xs whitespace-pre-wrap">{item.model.sql}</pre>
                       </ScrollArea>
                     </div>
                   </div>
+                  
                   {index < gradingResults.length - 1 && <Separator className="my-4" />}
                 </div>
               ))}
@@ -214,7 +253,7 @@ const AssignmentGrader = () => {
               />
             </CardContent>
           </Card>
-
+          
           <Card>
             <CardHeader>
               <CardTitle>Model Answers SQL</CardTitle>

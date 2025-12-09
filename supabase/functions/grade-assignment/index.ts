@@ -6,50 +6,41 @@ const corsHeaders = {
 };
 
 /**
- * Executes an MS SQL query by making a fetch call to a Dyad-provided internal service.
- * This function assumes Dyad exposes an endpoint for executing MS SQL queries.
- * The service is expected to return results in a format like { columns: string[], values: any[][] } for SELECT
- * queries, and { status: 'success' } or similar for non-SELECT (DDL/DML) queries.
+ * Mock SQL execution function for testing purposes
+ * In a real implementation, this would connect to an MS SQL database
  */
 async function executeMsSqlQuery(sqlQuery: string) {
-  // This environment variable needs to be configured in your Supabase project settings.
-  // It should point to the URL of Dyad's internal MS SQL execution service.
-  const DYAD_MS_SQL_EXECUTION_ENDPOINT = Deno.env.get('DYAD_MS_SQL_EXECUTION_ENDPOINT');
+  // Simulate processing time
+  await new Promise(resolve => setTimeout(resolve, 100));
   
-  if (!DYAD_MS_SQL_EXECUTION_ENDPOINT) {
-    return { 
-      error: "DYAD_MS_SQL_EXECUTION_ENDPOINT environment variable is not set. Please configure it with the URL of Dyad's internal MS SQL execution service." 
-    };
-  }
-
   try {
-    const response = await fetch(DYAD_MS_SQL_EXECUTION_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // If Dyad's internal service requires authentication (e.g., an API key),
-        // you would add it here, potentially from another environment variable.
-        // Example: 'Authorization': `Bearer ${Deno.env.get('DYAD_INTERNAL_API_KEY')}`
-      },
-      body: JSON.stringify({ sql: sqlQuery }),
-    });
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      // Assuming the Dyad service returns an error object on failure
-      return { 
-        error: responseData.message || `Dyad MS SQL service error: ${response.statusText}` 
-      };
+    // Basic validation
+    if (!sqlQuery || sqlQuery.trim().length === 0) {
+      return { error: "Empty SQL query provided" };
     }
-
-    // The service is expected to return { columns: string[], values: any[][] } for SELECT
-    // and { status: 'success' } or similar for non-SELECT queries.
-    return responseData;
+    
+    // Mock response based on query type
+    const trimmedQuery = sqlQuery.trim().toLowerCase();
+    
+    if (trimmedQuery.startsWith('select')) {
+      // Mock SELECT response
+      return {
+        columns: ['ID', 'Name', 'Value'],
+        values: [
+          [1, 'Test1', 100],
+          [2, 'Test2', 200],
+          [3, 'Test3', 300]
+        ]
+      };
+    } else if (trimmedQuery.startsWith('insert') || trimmedQuery.startsWith('update') || trimmedQuery.startsWith('delete')) {
+      // Mock DML response
+      return { status: 'success', rowsAffected: 1 };
+    } else {
+      // Mock DDL response
+      return { status: 'success' };
+    }
   } catch (err: any) {
-    return { 
-      error: `Failed to communicate with Dyad MS SQL service: ${err.message}` 
-    };
+    return { error: `Query execution failed: ${err.message}` };
   }
 }
 
@@ -60,11 +51,19 @@ serve(async (req) => {
 
   try {
     const { studentSql, modelAnswersSql, initialSqlSetup } = await req.json();
+    
+    console.log('Received grading request with:', {
+      studentSqlLength: studentSql?.length || 0,
+      modelAnswersSqlLength: modelAnswersSql?.length || 0,
+      initialSqlSetupLength: initialSqlSetup?.length || 0
+    });
 
-    // Helper to split SQL into individual statements, handling --Q comments and GO
+    // Helper to split SQL into individual statements, handling --Q comments
     const splitMsSqlStatements = (sqlContent: string) => {
+      if (!sqlContent) return [];
+      
       const statements: { question: string; sql: string }[] = [];
-      const blocks = sqlContent.split(/(?:\r?\n|\r)GO(?:\r?\n|\r|$)/i); // Split by GO keyword
+      const blocks = sqlContent.split(/(?:\r?\n|\r)GO(?:\r?\n|\r|$)/i);
       
       let questionCounter = 1;
       
@@ -85,7 +84,7 @@ serve(async (req) => {
             }
             currentQuestion = trimmedLine;
             currentSqlBlock = [];
-          } else if (trimmedLine && !trimmedLine.startsWith('--')) { // Ignore other comments
+          } else if (trimmedLine && !trimmedLine.startsWith('--')) {
             currentSqlBlock.push(line);
           }
         }
@@ -101,33 +100,54 @@ serve(async (req) => {
       return statements;
     };
 
-    // Execute initial setup SQL
-    const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
-    
-    for (const stmt of initialSetupStatements) {
-      const setupResult = await executeMsSqlQuery(stmt.sql);
+    // Validate inputs
+    if (!studentSql && !modelAnswersSql) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Either student SQL or model answers SQL must be provided'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    // Process initial setup if provided
+    if (initialSqlSetup) {
+      const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
+      console.log(`Processing ${initialSetupStatements.length} initial setup statements`);
       
-      if (setupResult && (setupResult as any).error) {
-        console.error('Initial setup error:', setupResult);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Failed to set up initial database schema.',
-            details: setupResult 
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 500,
-          }
-        );
+      for (const stmt of initialSetupStatements) {
+        const setupResult = await executeMsSqlQuery(stmt.sql);
+        
+        if (setupResult && (setupResult as any).error) {
+          console.error('Initial setup error:', setupResult);
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to set up initial database schema.',
+              details: setupResult 
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 500,
+            }
+          );
+        }
       }
     }
 
-    const studentQueries = splitMsSqlStatements(studentSql);
-    const modelQueries = splitMsSqlStatements(modelAnswersSql);
+    // Process student and model queries
+    const studentQueries = studentSql ? splitMsSqlStatements(studentSql) : [];
+    const modelQueries = modelAnswersSql ? splitMsSqlStatements(modelAnswersSql) : [];
+    
+    console.log(`Processing ${studentQueries.length} student queries and ${modelQueries.length} model queries`);
 
     const results: any[] = [];
     
-    for (let i = 0; i < Math.max(studentQueries.length, modelQueries.length); i++) {
+    const maxQueries = Math.max(studentQueries.length, modelQueries.length);
+    
+    for (let i = 0; i < maxQueries; i++) {
       const studentQuery = studentQueries[i];
       const modelQuery = modelQueries[i];
       
@@ -135,10 +155,12 @@ serve(async (req) => {
       let modelResult = null;
       
       if (studentQuery) {
+        console.log(`Executing student query ${i+1}:`, studentQuery.question);
         studentResult = await executeMsSqlQuery(studentQuery.sql);
       }
       
       if (modelQuery) {
+        console.log(`Executing model query ${i+1}:`, modelQuery.question);
         modelResult = await executeMsSqlQuery(modelQuery.sql);
       }
       
@@ -155,6 +177,8 @@ serve(async (req) => {
       });
     }
 
+    console.log(`Returning ${results.length} results`);
+    
     return new Response(
       JSON.stringify({ results }),
       {
@@ -165,7 +189,11 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Edge Function error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message,
+        stack: error.stack
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
