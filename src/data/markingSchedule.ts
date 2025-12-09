@@ -15,15 +15,15 @@ ORDER		1
 		
 Q3		
 SELECT		1
-FROM		1
-WHERE		1
+JOIN 1		1
+JOIN 2		1
 ORDER		1
 		
 		
 Q4		
 SELECT		1
 FROM		1
-WHERE		2
+JOIN		2
 		
 		
 Q5		
@@ -39,31 +39,33 @@ FROM		0.5
 Q6		
 SELECT		1
 FROM		0.5
-WHERE		1
-GROUP		1
+JOIN		1
+GROUP BY		1
 ORDER		0.5
 		
 		
 Q7		
-SELECT		1
+SELECT		0.5
 FROM		0.5
-WHERE		1
-GROUP		1
+JOIN 1		1
+JOIN 2		1
+GROUP		0.5
 ORDER		0.5
 		
 		
 Q8		
 SELECT		1
 FROM		1
-WHERE		2
+WHERE .. IN		1
+Subquery		1
 		
 		
 Q9		
 SELECT		0.5
 FROM		0.5
-LEFT		1
-AND		1
-AND		1
+LEFT OUTER JOIN		1
+AND 1		1
+AND 2		1
 		
 		
 Q10		
@@ -148,7 +150,7 @@ AS		1
 BEGIN		1
 RETURN @km * 0.62		2
 END		1
-CAST(dbo.KmToMiles(@km) AS VARCHAR(10)) + ' miles'		2
+"CONVERT(VARCHAR(10), dbo.KmToMiles(@km)) + ' miles'	"		2
 `;
 
 export const parseMarkingSchedule = (scheduleText: string) => {
