@@ -19,6 +19,22 @@ async function createHash(message: string): Promise<string> {
 }
 
 /**
+ * Normalizes a SQL query string for consistent hashing.
+ * Removes extra whitespace and standardizes line endings.
+ */
+function normalizeSqlQuery(sql: string): string {
+  // Standardize line endings to \n
+  let normalized = sql.replace(/\r\n/g, '\n');
+  // Replace all newlines with a single space
+  normalized = normalized.replace(/\n/g, ' ');
+  // Replace multiple spaces with a single space
+  normalized = normalized.replace(/\s+/g, ' ');
+  // Trim leading/trailing whitespace
+  normalized = normalized.trim();
+  return normalized;
+}
+
+/**
  * Simulates MS SQL query execution.
  * For SELECT queries, it returns a hash of the query for comparison.
  * For other queries, it returns a success status.
@@ -35,8 +51,9 @@ async function executeMsSqlQuery(sqlQuery: string) {
     const trimmedQuery = sqlQuery.trim().toLowerCase();
     
     if (trimmedQuery.startsWith('select')) {
-      // For SELECT queries, return a hash of the query for comparison
-      const queryHash = await createHash(sqlQuery);
+      // For SELECT queries, normalize the query string before hashing for consistent comparison
+      const normalizedQuery = normalizeSqlQuery(sqlQuery);
+      const queryHash = await createHash(normalizedQuery);
 
       // Return mock columns/values for display, and the hash for comparison
       return {

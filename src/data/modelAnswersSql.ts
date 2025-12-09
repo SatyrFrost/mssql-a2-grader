@@ -26,7 +26,7 @@ FROM Orders JOIN Salesperson
 ON Orders.SalespersonID = Salesperson.SalespersonID
 
 --Q5
-SELECT MAX(Price) AS "Max", MIN(Price) AS "Min", COUNT(InvoiceID) AS "Count", SUM(Price) AS "Total", AVG(Price) AS "Average"
+SELECT MAX(Price) AS 'Max', MIN(Price) AS 'Min', COUNT(InvoiceID) AS 'Count', SUM(Price) AS 'Total', AVG(Price) AS 'Average'
 FROM Sale
 
 --Q6
