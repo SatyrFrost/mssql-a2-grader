@@ -51,6 +51,15 @@ const AssignmentGrader = () => {
     return sql.replace(/\r\n/g, '\n').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
   };
 
+  // Helper function to format question titles for display
+  const displayQuestionTitle = (questionText: string) => {
+    const match = questionText.match(/--(Q\d+)/);
+    if (match && match[1]) {
+      return `Question ${match[1].substring(1)}`; // Extract just the number from Q1, Q2, etc.
+    }
+    return questionText; // Fallback if format doesn't match
+  };
+
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
     questionId: string,
@@ -145,15 +154,6 @@ const AssignmentGrader = () => {
         feedback.push(`-0 for missing '${keyword}'.`);
       }
     }
-
-    // Removed general hash comparison feedback as aliases are flexible.
-    // if (studentResult?.hash && modelResult?.hash) {
-    //   if (studentResult.hash === modelResult.hash) {
-    //     feedback.push("Overall SELECT query structure/content (simulated by hash) matches model's.");
-    //   } else {
-    //     feedback.push("Overall SELECT query structure/content (simulated by hash) does NOT match model's.");
-    //   }
-    // }
 
     return { score, maxScore, feedback };
   };
@@ -376,7 +376,7 @@ const AssignmentGrader = () => {
               {gradingResults.map((item, index) => (
                 <div key={index} className="border p-4 rounded-md bg-muted/20">
                   <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
-                    {item.question}
+                    {displayQuestionTitle(item.question)}
                     {item.grade && (
                       <Badge variant="outline" className="text-md px-3 py-1">
                         Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
