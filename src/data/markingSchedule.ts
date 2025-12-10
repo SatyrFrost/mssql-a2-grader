@@ -76,21 +76,23 @@ FROM		1
 		
 --Q11
 REGEX::@\\w+\\s+INT		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+INT		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
-REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\)		0.5
-SELECT CustomerID, FirstName, FamilyName, Phone, Address1, Address2, Address3		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+SELECT CustomerID, FirstName, FamilyName, Address1, Address2, Address3, Phone		0.5
 FROM Customer		0.5
 REGEX::WHERE CustomerID = @\\w+		1
 REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
-REGEX::PRINT 'CUSTOMER DETAILS:'		0.5
+REGEX::PRINT 'CUSTOMER DETAILS'		0.5
 REGEX::PRINT ''		0.5
 REGEX::PRINT 'Customer ID: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s+\\+\\s+'        Phone: ' \\+ @\\w+		0.5
 REGEX::PRINT 'Customer Name: ' \\+ @\\w+\\s+\\+\\s+' ' \\+ @\\w+		0.5
 REGEX::PRINT 'Address: ' \\+ @\\w+\\s+\\+\\s+', ' \\+ @\\w+\\s+\\+\\s+', ' \\+ @\\w+		0.5
+REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
 REGEX::EXEC\\s+\\w+\\s+1		0.5
 		
 		
