@@ -167,7 +167,7 @@ const AssignmentGrader = () => {
           feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
         }
       }
-      else if (studentSqlLower.includes(keywordLower)) {
+      else if (studentSqlLower.includes(keyword.toLowerCase())) { // FIX: Changed keywordLower to keyword.toLowerCase()
         score += points;
         feedback.push(`+${points} for '${keyword}'.`);
       } else {
