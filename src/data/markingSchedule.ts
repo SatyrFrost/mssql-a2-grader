@@ -65,19 +65,19 @@ SELECT 2
 FROM 1
 
 --Q11
+REGEX::CREATE_PROCEDURE_HEADER::CREATE\\s+PROCEDURE\\s+\\w+\\s+\\(` 0.5
 REGEX::PARAM_INT::@\\w+\\s+INT 0.5
-REGEX::DECLARE_INT::DECLARE\\s+@\\w+\\s+AS\\s+INT 0.5
-REGEX::DECLARE_VARCHAR100_1::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::DECLARE_VARCHAR100_2::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::DECLARE_VARCHAR100_3::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::DECLARE_VARCHAR100_4::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::DECLARE_VARCHAR100_5::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::DECLARE_VARCHAR100_6::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
-REGEX::SELECT_COLUMNS::SELECT\\s+CustomerID,\\s*FirstName,\\s*FamilyName,\\s*Address1,\\s*Address2,\\s*Address3,\\s*Phone 0.5
+REGEX::DECLARE_VARCHAR100_CFiN::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
+REGEX::DECLARE_VARCHAR100_CFaN::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
+REGEX::DECLARE_VARCHAR100_CA1::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
+REGEX::DECLARE_VARCHAR100_CA2::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
+REGEX::DECLARE_VARCHAR100_CA3::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
+REGEX::DECLARE_VARCHAR20_Ph::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\) 0.5
+REGEX::SELECT_COLUMNS::SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM` 0.5
 REGEX::FROM_CUSTOMER::FROM\\s+Customer 0.5
-REGEX::WHERE_CID::WHERE\\s+CustomerID\\s+=\\s*@\\w+ 1
+REGEX::WHERE_CID::WHERE\\s+CustomerID\\s+=\\s*@\\w+ 1.5
 REGEX::FETCH_NEXT_1::FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+\\s* 0.5
-REGEX::PRINT_DETAILS_HEADER::PRINT\\s+'CUSTOMER\\s+DETAILS' 0.5
+REGEX::PRINT_DETAILS_HEADER::PRINT\\s+'CUSTOMER\\s+DETAILS:' 0.5
 REGEX::PRINT_EMPTY_LINE_1::PRINT\\s+'' 0.5
 REGEX::PRINT_CID_PHONE::PRINT\\s+'Customer\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'\\s+Phone:\\s+'\\s*\\+\\s*@\\w+ 0.5
 REGEX::PRINT_NAME::PRINT\\s+'Customer\\s+Name:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*'\\s+'\\s*\\+\\s*@\\w+ 0.5
@@ -139,7 +139,6 @@ export const parseMarkingSchedule = (scheduleText: string) => {
 
   let currentQuestionId = '';
   const questionRegex = /^--(Q\d+)$/; // Matches --Q1, --Q2, etc.
-  // Updated itemRegex to handle the new format: REGEX::UNIQUE_ID::PATTERN POINTS
   const itemRegex = /^(REGEX::[^:]+::.+?|[^:]+?)\s+(\d+(\.\d+)?)$/; 
 
   for (const line of lines) {
