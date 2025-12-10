@@ -82,15 +82,16 @@ const AssignmentGrader = () => {
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
     for (const [keyword, points] of Object.entries(questionMarking)) {
-      maxScore += points;
-      const keywordLower = keyword.toLowerCase();
-
-      // Handle regex-based keywords
+      maxScore += points; // This is where maxScore is accumulated
+      
+      // Handle regex-based keywords with unique identifiers
       if (keyword.startsWith('REGEX::')) {
-        const regexPattern = keyword.substring(7); // Remove 'REGEX::' prefix
+        const parts = keyword.split('::');
+        // Extract the actual regex pattern, skipping the 'REGEX' prefix and the unique ID
+        const regexPattern = parts.length > 2 ? parts.slice(2).join('::') : parts[1]; 
         try {
           const regex = new RegExp(regexPattern, 'is'); // 's' flag for dotall, 'i' for case-insensitive
-          if (regex.test(studentSql)) {
+          if (regex.test(studentSql)) { // Test against the full studentSql
             score += points;
             feedback.push(`+${points} for matching pattern: \`${regexPattern}\`.`);
           } else {
@@ -102,6 +103,7 @@ const AssignmentGrader = () => {
         continue; // Move to the next keyword
       }
 
+      // Existing logic for non-regex keywords (Q1-Q10)
       if (keyword === '[labels]') {
         // Special handling for Q5 aliases: check for presence of 'AS' keywords
         if (questionId === 'Q5') {
