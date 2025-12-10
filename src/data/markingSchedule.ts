@@ -123,8 +123,8 @@ REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+ 0.5
 REGEX::EXEC\\s+\\w+\\s+1 1
 
 --Q14
-REGEX::CREATE FUNCTION \\w+ \\( 1
-REGEX::@\\w+\\s+INT \\) 1
+REGEX::CREATE FUNCTION \\w+ \\(` 1
+REGEX::@\\w+\\s+INT \\)` 1
 REGEX::RETURNS FLOAT 1
 REGEX::AS 1
 REGEX::BEGIN 1
