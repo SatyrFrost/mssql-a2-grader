@@ -73,7 +73,7 @@ REGEX::DECLARE_VARCHAR100_CA1::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE_VARCHAR100_CA2::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE_VARCHAR100_CA3::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE_VARCHAR20_Ph::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\) 0.5
-REGEX::SELECT_COLUMNS::SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM` 0.5
+REGEX::SELECT_COLUMNS::SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM 0.5
 REGEX::FROM_CUSTOMER::FROM\\s+Customer 0.5
 REGEX::WHERE_CID::WHERE\\s+CustomerID\\s+=\\s*@\\w+ 1.5
 REGEX::FETCH_NEXT_1::FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+\\s* 0.5
@@ -123,14 +123,14 @@ REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+ 0.5
 REGEX::EXEC\\s+\\w+\\s+1 1
 
 --Q14
-REGEX::CREATE FUNCTION \\w+ \\(` 1
-REGEX::@\\w+\\s+INT \\)` 1
+REGEX::CREATE FUNCTION \\w+ \\( 1
+REGEX::@\\w+\\s+INT \\) 1
 REGEX::RETURNS FLOAT 1
 REGEX::AS 1
 REGEX::BEGIN 1
 REGEX::RETURN @\\w+\\s+\\*\\s+0\\.62 2
 REGEX::END 1
-REGEX::"CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.\\w+\\(@\\w+\\)\\)\\s+\\+\\s+' miles' " 2
+REGEX::PRINT_MILEAGE::CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.\\w+\\(@\\w+\\)\\)\\s+\\+\\s+' miles' 2
 `;
 
 export const parseMarkingSchedule = (scheduleText: string) => {
