@@ -95,47 +95,37 @@ serve(async (req) => {
       if (!sqlContent) return [];
       
       const statements: { question: string; sql: string }[] = [];
-      // Split by GO statements first
-      const blocks = sqlContent.split(/(?:\r?\n)GO(?:\r?\n)/i);
       
-      let questionCounter = 1;
+      // Split the entire content by --Q<number> to identify distinct questions
+      // This regex captures the question marker (--Q1, --Q2, etc.) and the content following it.
+      const questionBlocks = sqlContent.split(/(--Q\d+)/g);
       
-      for (const block of blocks) {
-        const lines = block.split('\n');
-        let currentQuestion = '';
-        let currentSqlBlock: string[] = [];
-        
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          
-          // Check if line starts with --Q followed by content (handles --Q1, --Q2, etc.)
-          if (trimmedLine.startsWith('--Q')) {
-            // If we already have a question being built, save it
-            if (currentQuestion && currentSqlBlock.length > 0) {
+      let currentQuestionId = '';
+      let globalStatementCounter = 1; // To assign unique IDs if --Q is missing
+
+      for (let i = 0; i < questionBlocks.length; i++) {
+        const block = questionBlocks[i].trim();
+
+        if (block.startsWith('--Q')) {
+          currentQuestionId = block; // e.g., "--Q1", "--Q11"
+        } else if (block.length > 0) {
+          // This block contains SQL for the currentQuestionId (or the previous one if no --Q was found)
+          // Now, split this SQL block by 'GO' to get individual statements
+          const goSeparatedStatements = block.split(/(?:\r?\n)GO(?:\r?\n)/i);
+
+          for (const stmtPart of goSeparatedStatements) {
+            const trimmedStmt = stmtPart.trim();
+            if (trimmedStmt.length > 0) {
+              // If we have a currentQuestionId from a --Q comment, use it.
+              // Otherwise, assign a generic "Statement X"
+              const questionLabel = currentQuestionId || `Statement ${globalStatementCounter}`;
               statements.push({
-                question: currentQuestion,
-                sql: currentSqlBlock.join('\n').trim()
+                question: questionLabel,
+                sql: trimmedStmt
               });
+              globalStatementCounter++; // Increment for next generic statement
             }
-            // Start new question
-            currentQuestion = trimmedLine; // This will be --Q1, --Q2, etc.
-            currentSqlBlock = [];
-          } else if (trimmedLine && !trimmedLine.startsWith('--')) {
-            // Add non-comment, non-empty lines to current SQL block
-            currentSqlBlock.push(line);
           }
-        }
-        
-        // Don't forget the last statement in the block
-        if (currentSqlBlock.length > 0) {
-          // If no question marker was found in this block, assign a default one
-          if (!currentQuestion) {
-            currentQuestion = `Question ${questionCounter++}`;
-          }
-          statements.push({
-            question: currentQuestion,
-            sql: currentSqlBlock.join('\n').trim()
-          });
         }
       }
       
