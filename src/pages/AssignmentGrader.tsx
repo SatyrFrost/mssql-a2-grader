@@ -46,6 +46,11 @@ const AssignmentGrader = () => {
     return matches ? matches.length : 0;
   };
 
+  // Helper function to normalize SQL for comparison (removes extra whitespace, standardizes line endings)
+  const normalizeSqlForComparison = (sql: string): string => {
+    return sql.replace(/\r\n/g, '\n').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  };
+
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
     questionId: string,
@@ -65,7 +70,7 @@ const AssignmentGrader = () => {
     }
 
     const studentSqlLower = studentSql.toLowerCase();
-    // const modelSqlLower = modelSql.toLowerCase(); // Not directly used for keyword matching, but kept for context
+    const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
     for (const [keyword, points] of Object.entries(questionMarking)) {
       maxScore += points;
@@ -98,7 +103,23 @@ const AssignmentGrader = () => {
         } else {
           feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
         }
-      } else if (studentSqlLower.includes(keywordLower)) {
+      } else if (keyword === 'WHERE .. NOT IN') {
+        if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
+          score += points;
+          feedback.push(`+${points} for 'WHERE ... NOT IN' clause.`);
+        } else {
+          feedback.push(`-0 for missing 'WHERE ... NOT IN' clause.`);
+        }
+      } else if (keyword === 'Subquery') {
+        const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
+        if (normalizedStudentSql.includes(expectedSubquery)) {
+          score += points;
+          feedback.push(`+${points} for correct subquery '${expectedSubquery}'.`);
+        } else {
+          feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
+        }
+      }
+      else if (studentSqlLower.includes(keywordLower)) {
         score += points;
         feedback.push(`+${points} for '${keyword}'.`);
       } else {

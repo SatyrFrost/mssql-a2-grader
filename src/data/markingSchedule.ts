@@ -56,7 +56,7 @@ ORDER		0.5
 Q8		
 SELECT		1
 FROM		1
-WHERE .. IN		1
+WHERE .. NOT IN		1
 Subquery		1
 		
 		
