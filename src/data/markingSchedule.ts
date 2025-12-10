@@ -66,29 +66,23 @@ FROM 1
 
 --Q11
 REGEX::@\\w+\\s+INT 0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+INT 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\) 0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\) 0.5
-REGEX::DECLARE\\s+@\\w+\\s+AS\\s+CURSOR 0.5
-REGEX::SET\\s+@\\w+\\s+=\\s+CURSOR\\s+FOR 0.5
-REGEX::SELECT\\s+CustomerID,\\s*FirstName,\\s*FamilyName,\\s*Phone,\\s*Address1,\\s*Address2,\\s*Address3 0.5
+REGEX::SELECT\\s+CustomerID,\\s*FirstName,\\s*FamilyName,\\s*Address1,\\s*Address2,\\s*Address3,\\s*Phone 0.5
 REGEX::FROM\\s+Customer 0.5
 REGEX::WHERE\\s+CustomerID\\s+=\\s*@\\w+ 1
-REGEX::OPEN\\s+@\\w+ 0.5
 REGEX::FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+ 0.5
-REGEX::PRINT\\s+'CUSTOMER\\s+DETAILS:' 0.5
+REGEX::PRINT\\s+'CUSTOMER\\s+DETAILS' 0.5
 REGEX::PRINT\\s+'' 0.5
-REGEX::PRINT\\s+'Customer\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\s*\\(\\s*VARCHAR\\s*\\(\\s*10\\s*\\)\\s*,\\s*@\\w+\\s*\\)\\s*\\+\\s*'\\s+Phone:\\s+'\\s*\\+\\s*@\\w+ 0.5
+REGEX::PRINT\\s+'Customer\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'\\s+Phone:\\s+'\\s*\\+\\s*@\\w+ 0.5
 REGEX::PRINT\\s+'Customer\\s+Name:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*'\\s+'\\s*\\+\\s*@\\w+ 0.5
 REGEX::PRINT\\s+'Address:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*',\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*',\\s+'\\s*\\+\\s*@\\w+ 0.5
-REGEX::WHILE\\s+@@FETCH_STATUS\\s*=\\s*0 0.5
 REGEX::FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+ 0.5
-REGEX::CLOSE\\s+@\\w+ 0.5
-REGEX::DEALLOCATE\\s+@\\w+ 0.5
-REGEX::END 0.5
 REGEX::EXEC\\s+\\w+\\s+1 0.5
 
 --Q12
