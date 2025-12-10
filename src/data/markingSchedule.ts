@@ -84,7 +84,7 @@ REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\)		0.5
 SELECT CustomerID, FirstName, FamilyName, Phone, Address1, Address2, Address3		0.5
 FROM Customer		0.5
-WHERE CustomerID = @\\w+		1
+REGEX::WHERE CustomerID = @\\w+		1
 REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
 REGEX::PRINT 'CUSTOMER DETAILS:'		0.5
 REGEX::PRINT ''		0.5
@@ -107,7 +107,7 @@ REGEX::DECLARE\\s+@\\w+\\s+AS\\s+MONEY		0.5
 SELECT RegistrationID, CarYear, Make, Model, ColourName, NumOwners, Kilometres, Price		0.5
 FROM Car JOIN LU_Colour		0.5
 ON Car.ColourID = LU_Colour.ColourID		0.5
-WHERE RegistrationID = @\\w+		1
+REGEX::WHERE RegistrationID = @\\w+		1
 REGEX::PRINT 'VEHICLE DETAILS:'		0.5
 REGEX::PRINT ''		0.5
 REGEX::PRINT 'Registration ID: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)		0.5
@@ -125,7 +125,7 @@ REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 SELECT SalespersonID, FirstName, FamilyName, Phone		1
 FROM Salesperson		0.5
-WHERE SalespersonID = @\\w+		1
+REGEX::WHERE SalespersonID = @\\w+		1
 REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
 REGEX::PRINT 'SALESPERSON DETAILS:'		0.5
 REGEX::PRINT ''		0.5
