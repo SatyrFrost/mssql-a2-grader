@@ -65,7 +65,7 @@ async function executeMsSqlQuery(sqlQuery: string) {
       return { status: 'success', rowsAffected: 1 };
     } else if (trimmedQuery.startsWith('create') || trimmedQuery.startsWith('drop') || trimmedQuery.startsWith('alter')) {
       return { status: 'success' };
-    } else if (trimmedQuery.startsWith('exec') || trimmedQuery.startsWith('go') || trimmedQuery.startsWith('declare') || trimmedQuery.startsWith('print')) {
+    } else if (trimmedQuery.startsWith('exec') || trimmedQuery.startsWith('declare') || trimmedQuery.startsWith('print')) {
       // For stored procedures, functions, etc., just return success for now
       return { status: 'success', message: 'Procedure/Function executed (mock)' };
     } else {
@@ -75,6 +75,74 @@ async function executeMsSqlQuery(sqlQuery: string) {
     return { error: `Mock query execution failed: ${err.message}` };
   }
 }
+
+interface SqlStatementPart {
+  sql: string;
+  type: 'select' | 'dml' | 'ddl' | 'proc_func' | 'other';
+}
+
+interface QuestionBlock {
+  questionId: string;
+  fullSql: string; // The complete SQL for the question, including GOs
+  sqlParts: SqlStatementPart[]; // Individual GO-separated parts
+}
+
+// Helper to split SQL into individual statements, handling --Q comments and GO
+const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
+  if (!sqlContent) return [];
+
+  const questionBlocks: QuestionBlock[] = [];
+  const lines = sqlContent.split('\n');
+  let currentQuestionId = '';
+  let currentSqlBuffer: string[] = [];
+  let statementCounter = 1; // For generic question IDs if --Q is missing
+
+  const processBuffer = () => {
+    if (currentSqlBuffer.length > 0) {
+      const fullSqlForQuestion = currentSqlBuffer.join('\n').trim();
+      if (fullSqlForQuestion.length > 0) {
+        const goSeparatedParts = fullSqlForQuestion.split(/(?:\r?\n)GO(?:\r?\n)/i);
+        const sqlParts: SqlStatementPart[] = goSeparatedParts
+          .map(part => part.trim())
+          .filter(part => part.length > 0)
+          .map(part => {
+            const lowerPart = part.toLowerCase();
+            let type: SqlStatementPart['type'] = 'other';
+            if (lowerPart.startsWith('select')) type = 'select';
+            else if (lowerPart.startsWith('insert') || lowerPart.startsWith('update') || lowerPart.startsWith('delete')) type = 'dml';
+            else if (lowerPart.startsWith('create') || lowerPart.startsWith('drop') || lowerPart.startsWith('alter')) type = 'ddl';
+            else if (lowerPart.startsWith('exec') || lowerPart.startsWith('declare') || lowerPart.startsWith('print')) type = 'proc_func';
+            return { sql: part, type };
+          });
+
+        if (sqlParts.length > 0) {
+          questionBlocks.push({
+            questionId: currentQuestionId || `Statement ${statementCounter++}`,
+            fullSql: fullSqlForQuestion,
+            sqlParts: sqlParts,
+          });
+        }
+      }
+    }
+    currentSqlBuffer = [];
+  };
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    const questionMatch = trimmedLine.match(/^(--Q\d+)$/i);
+
+    if (questionMatch) {
+      processBuffer(); // Process the previous question's buffer
+      currentQuestionId = questionMatch[1];
+    } else {
+      currentSqlBuffer.push(line);
+    }
+  }
+  processBuffer(); // Process the last question's buffer
+
+  return questionBlocks;
+};
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -90,108 +158,73 @@ serve(async (req) => {
       initialSqlSetupLength: initialSqlSetup?.length || 0
     });
 
-    // Helper to split SQL into individual statements, handling --Q comments and GO
-    const splitMsSqlStatements = (sqlContent: string) => {
-      if (!sqlContent) return [];
-      
-      const statements: { question: string; sql: string }[] = [];
-      
-      // Split the entire content by --Q<number> to identify distinct questions
-      // This regex captures the question marker (--Q1, --Q2, etc.) and the content following it.
-      const questionBlocks = sqlContent.split(/(--Q\d+)/g);
-      
-      let currentQuestionId = '';
-      let globalStatementCounter = 1; // To assign unique IDs if --Q is missing
-
-      for (let i = 0; i < questionBlocks.length; i++) {
-        const block = questionBlocks[i].trim();
-
-        if (block.startsWith('--Q')) {
-          currentQuestionId = block; // e.g., "--Q1", "--Q11"
-        } else if (block.length > 0) {
-          // This block contains SQL for the currentQuestionId (or the previous one if no --Q was found)
-          // Now, split this SQL block by 'GO' to get individual statements
-          const goSeparatedStatements = block.split(/(?:\r?\n)GO(?:\r?\n)/i);
-
-          for (const stmtPart of goSeparatedStatements) {
-            const trimmedStmt = stmtPart.trim();
-            if (trimmedStmt.length > 0) {
-              // If we have a currentQuestionId from a --Q comment, use it.
-              // Otherwise, assign a generic "Statement X"
-              const questionLabel = currentQuestionId || `Statement ${globalStatementCounter}`;
-              statements.push({
-                question: questionLabel,
-                sql: trimmedStmt
-              });
-              globalStatementCounter++; // Increment for next generic statement
-            }
-          }
-        }
-      }
-      
-      return statements;
-    };
-
     // Process initial setup if provided
     if (initialSqlSetup) {
-      const initialSetupStatements = splitMsSqlStatements(initialSqlSetup);
-      console.log(`Processing ${initialSetupStatements.length} initial setup statements`);
+      const initialSetupBlocks = splitMsSqlStatements(initialSqlSetup);
+      console.log(`Processing ${initialSetupBlocks.length} initial setup blocks`);
       
-      for (const stmt of initialSetupStatements) {
-        const setupResult = await executeMsSqlQuery(stmt.sql);
-        
-        if (setupResult && (setupResult as any).error) {
-          console.error('Initial setup error:', setupResult);
-          return new Response(
-            JSON.stringify({ 
-              error: 'Failed to set up initial database schema.',
-              details: setupResult 
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 500,
-            }
-          );
+      for (const block of initialSetupBlocks) {
+        for (const stmtPart of block.sqlParts) {
+          const setupResult = await executeMsSqlQuery(stmtPart.sql);
+          if (setupResult && (setupResult as any).error) {
+            console.error('Initial setup error:', setupResult);
+            return new Response(
+              JSON.stringify({ 
+                error: 'Failed to set up initial database schema.',
+                details: setupResult 
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500,
+              }
+            );
+          }
         }
       }
     }
 
     // Process student and model queries
-    const studentQueries = studentSql ? splitMsSqlStatements(studentSql) : [];
-    const modelQueries = modelAnswersSql ? splitMsSqlStatements(modelAnswersSql) : [];
+    const studentQuestionBlocks = studentSql ? splitMsSqlStatements(studentSql) : [];
+    const modelQuestionBlocks = modelAnswersSql ? splitMsSqlStatements(modelAnswersSql) : [];
     
-    console.log(`Processing ${studentQueries.length} student queries and ${modelQueries.length} model queries`);
+    console.log(`Processing ${studentQuestionBlocks.length} student questions and ${modelQuestionBlocks.length} model questions`);
 
     const results: any[] = [];
     
-    const maxQueries = Math.max(studentQueries.length, modelQueries.length);
+    const maxQuestionBlocks = Math.max(studentQuestionBlocks.length, modelQuestionBlocks.length);
     
-    for (let i = 0; i < maxQueries; i++) {
-      const studentQuery = studentQueries[i];
-      const modelQuery = modelQueries[i];
+    for (let i = 0; i < maxQuestionBlocks; i++) {
+      const studentBlock = studentQuestionBlocks[i];
+      const modelBlock = modelQuestionBlocks[i];
       
-      let studentResult = null;
-      let modelResult = null;
-      
-      if (studentQuery) {
-        console.log(`Executing student query ${i+1}:`, studentQuery.question);
-        studentResult = await executeMsSqlQuery(studentQuery.sql);
+      const studentResultsForQuestion: any[] = [];
+      const modelResultsForQuestion: any[] = [];
+
+      // Execute all parts for student's question
+      if (studentBlock) {
+        for (const part of studentBlock.sqlParts) {
+          const partResult = await executeMsSqlQuery(part.sql);
+          studentResultsForQuestion.push(partResult);
+        }
       }
-      
-      if (modelQuery) {
-        console.log(`Executing model query ${i+1}:`, modelQuery.question);
-        modelResult = await executeMsSqlQuery(modelQuery.sql);
+
+      // Execute all parts for model's question
+      if (modelBlock) {
+        for (const part of modelBlock.sqlParts) {
+          const partResult = await executeMsSqlQuery(part.sql);
+          modelResultsForQuestion.push(partResult);
+        }
       }
       
       results.push({
-        question: studentQuery?.question || modelQuery?.question || `Question ${i + 1}`,
+        question: studentBlock?.questionId || modelBlock?.questionId || `Question ${i + 1}`,
         student: {
-          sql: studentQuery?.sql || 'N/A',
-          result: studentResult,
+          sql: studentBlock?.fullSql || 'N/A', // Use fullSql for display
+          result: studentResultsForQuestion, // Now an array of results
         },
         model: {
-          sql: modelQuery?.sql || 'N/A',
-          result: modelResult,
+          sql: modelBlock?.fullSql || 'N/A', // Use fullSql for display
+          result: modelResultsForQuestion, // Now an array of results
         },
       });
     }

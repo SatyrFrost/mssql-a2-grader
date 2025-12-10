@@ -18,11 +18,11 @@ interface QueryResult {
   question: string;
   student: {
     sql: string;
-    result: any;
+    result: any; // This can now be an array of results
   };
   model: {
     sql: string;
-    result: any;
+    result: any; // This can now be an array of results
   };
   grade?: {
     score: number;
@@ -65,8 +65,8 @@ const AssignmentGrader = () => {
     questionId: string,
     studentSql: string,
     modelSql: string,
-    studentResult: any,
-    modelResult: any
+    studentResult: any, // This can now be an array
+    modelResult: any // This can now be an array
   ): { score: number; maxScore: number; feedback: string[] } => {
     let score = 0;
     let maxScore = 0;
@@ -106,7 +106,8 @@ const AssignmentGrader = () => {
           // but for now, we'll treat it as a general output correctness check.
           // Given the user's feedback, we'll make this lenient.
           // For now, if it's not Q5, we'll just give the point if the query executed without error.
-          if (!studentResult?.error) {
+          const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
+          if (!studentHasError) {
              score += points;
              feedback.push(`+${points} for labels (query executed successfully).`);
           } else {
@@ -215,11 +216,11 @@ const AssignmentGrader = () => {
             question: "Overall Grading Error",
             student: {
               sql: studentSql,
-              result: { error: error.message }
+              result: [{ error: error.message }] // Wrap in array for consistency
             },
             model: {
               sql: modelAnswersSql,
-              result: { error: "N/A" }
+              result: [{ error: "N/A" }] // Wrap in array for consistency
             }
           }]);
         }
@@ -260,11 +261,11 @@ const AssignmentGrader = () => {
         question: "Overall Grading Error",
         student: {
           sql: studentSql,
-          result: { error: error.message }
+          result: [{ error: error.message }] // Wrap in array for consistency
         },
         model: {
           sql: modelAnswersSql,
-          result: { error: "N/A" }
+          result: [{ error: "N/A" }] // Wrap in array for consistency
         }
       }]);
     } finally {
@@ -272,49 +273,35 @@ const AssignmentGrader = () => {
     }
   };
 
-  const renderResult = (result: any) => {
-    if (result === null) {
+  const renderResult = (resultsArray: any) => { // Renamed parameter to reflect it's an array
+    if (!resultsArray || resultsArray.length === 0) {
       return <p className="text-muted-foreground">No query executed or result available.</p>;
     }
     
-    if (result.error) {
-      return (
-        <div className="text-red-500 text-sm">
-          <p>Error: {result.error}</p>
-          {result.sqlstate && <p>SQLSTATE: {result.sqlstate}</p>}
-        </div>
-      );
-    }
-    
-    if (result.status === 'success') {
-      return <p className="text-green-600 text-sm">Query executed successfully.</p>;
-    }
-    
-    // Display hash for SELECT queries
-    if (result.hash) {
-      return (
-        <div className="text-sm">
-          <p>Query Hash: <code className="font-mono text-xs">{result.hash.substring(0, 10)}...</code></p>
-          <p className="text-muted-foreground">Simulated output based on query content.</p>
-        </div>
-      );
-    }
+    // If it's a single result (e.g., for simple SELECTs), wrap it in an array for consistency
+    const actualResults = Array.isArray(resultsArray) ? resultsArray : [resultsArray];
 
-    if (Array.isArray(result)) {
-      if (result.length === 0) {
-        return <p className="text-muted-foreground">No rows returned.</p>;
-      }
-      
-      return (
-        <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background">
-          <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
-        </ScrollArea>
-      );
-    }
-    
     return (
-      <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background">
-        <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+      <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background space-y-2">
+        {actualResults.map((result, idx) => (
+          <div key={idx} className="pb-2 border-b last:border-b-0 border-muted-foreground/20">
+            {result.error ? (
+              <div className="text-red-500 text-sm">
+                <p>Error (Part {idx + 1}): {result.error}</p>
+                {result.sqlstate && <p>SQLSTATE: {result.sqlstate}</p>}
+              </div>
+            ) : result.status === 'success' ? (
+              <p className="text-green-600 text-sm">Part {idx + 1}: Query executed successfully.</p>
+            ) : result.hash ? (
+              <div className="text-sm">
+                <p>Part {idx + 1} Query Hash: <code className="font-mono text-xs">{result.hash.substring(0, 10)}...</code></p>
+                <p className="text-muted-foreground">Simulated output based on query content.</p>
+              </div>
+            ) : (
+              <pre className="text-xs whitespace-pre-wrap">Part {idx + 1}: {JSON.stringify(result, null, 2)}</pre>
+            )}
+          </div>
+        ))}
       </ScrollArea>
     );
   };
