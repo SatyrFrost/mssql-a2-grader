@@ -77,13 +77,32 @@ const AssignmentGrader = () => {
       const keywordLower = keyword.toLowerCase();
 
       if (keyword === '[labels]') {
-        // For labels, assume correct if student's SELECT query hash matches model's
-        // This is a proxy for "output correctness" given the mock execution.
-        if (studentResult?.hash && modelResult?.hash && studentResult.hash === modelResult.hash) {
-          score += points;
-          feedback.push(`+${points} for correct labels (implied by matching query hash).`);
+        // Special handling for Q5 aliases: check for presence of 'AS' keywords
+        if (questionId === 'Q5') {
+          const selectClauseMatch = studentSql.match(/SELECT\s+(.*?)\s+FROM/is);
+          if (selectClauseMatch && selectClauseMatch[1]) {
+            const selectContent = selectClauseMatch[1];
+            const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
+            if (asCount >= 5) { // Expecting 5 aliases for Q5 aggregate functions
+              score += points;
+              feedback.push(`+${points} for correctly including aliases for aggregate functions.`);
+            } else {
+              feedback.push(`-0 for missing or insufficient aliases for aggregate functions.`);
+            }
+          } else {
+            feedback.push(`-0 for labels (could not parse SELECT clause for alias check).`);
+          }
         } else {
-          feedback.push(`-0 for labels (query hash mismatch or not applicable).`);
+          // For other questions, if [labels] is used, it might still imply hash comparison
+          // but for now, we'll treat it as a general output correctness check.
+          // Given the user's feedback, we'll make this lenient.
+          // For now, if it's not Q5, we'll just give the point if the query executed without error.
+          if (!studentResult?.error) {
+             score += points;
+             feedback.push(`+${points} for labels (query executed successfully).`);
+          } else {
+             feedback.push(`-0 for labels (query execution failed).`);
+          }
         }
       } else if (keyword.startsWith('JOIN ')) {
         const joinNumber = parseInt(keyword.split(' ')[1]);
@@ -127,14 +146,14 @@ const AssignmentGrader = () => {
       }
     }
 
-    // Add a general feedback for SELECT query hash comparison
-    if (studentResult?.hash && modelResult?.hash) {
-      if (studentResult.hash === modelResult.hash) {
-        feedback.push("Overall SELECT query structure/content (simulated by hash) matches model's.");
-      } else {
-        feedback.push("Overall SELECT query structure/content (simulated by hash) does NOT match model's.");
-      }
-    }
+    // Removed general hash comparison feedback as aliases are flexible.
+    // if (studentResult?.hash && modelResult?.hash) {
+    //   if (studentResult.hash === modelResult.hash) {
+    //     feedback.push("Overall SELECT query structure/content (simulated by hash) matches model's.");
+    //   } else {
+    //     feedback.push("Overall SELECT query structure/content (simulated by hash) does NOT match model's.");
+    //   }
+    // }
 
     return { score, maxScore, feedback };
   };
