@@ -85,6 +85,23 @@ const AssignmentGrader = () => {
       maxScore += points;
       const keywordLower = keyword.toLowerCase();
 
+      // Handle regex-based keywords
+      if (keyword.startsWith('REGEX::')) {
+        const regexPattern = keyword.substring(7); // Remove 'REGEX::' prefix
+        try {
+          const regex = new RegExp(regexPattern, 'is'); // 's' flag for dotall, 'i' for case-insensitive
+          if (regex.test(studentSql)) {
+            score += points;
+            feedback.push(`+${points} for matching pattern: \`${regexPattern}\`.`);
+          } else {
+            feedback.push(`-0 for not matching pattern: \`${regexPattern}\`.`);
+          }
+        } catch (e: any) {
+          feedback.push(`Error in regex pattern '${regexPattern}': ${e.message}`);
+        }
+        continue; // Move to the next keyword
+      }
+
       if (keyword === '[labels]') {
         // Special handling for Q5 aliases: check for presence of 'AS' keywords
         if (questionId === 'Q5') {
@@ -346,6 +363,9 @@ const AssignmentGrader = () => {
             >
               {isGrading ? "Grading..." : "Grade Assignment"}
             </Button>
+            <p className="text-sm text-muted-foreground">
+              Note: For T-SQL procedural questions (Q11-Q15), variable names (starting with '@') are flexible and do not need to match the model answer exactly, as long as the overall structure and data types are correct.
+            </p>
           </CardContent>
         </Card>
 

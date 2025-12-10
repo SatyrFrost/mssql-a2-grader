@@ -75,79 +75,78 @@ FROM		1
 		
 		
 --Q11
-@CID INT		0.5
-DECLARE @CFiN AS VARCHAR(100)		0.5
-DECLARE @CFaN AS VARCHAR(100)		0.5
-DECLARE @CA1 AS VARCHAR(100)		0.5
-DECLARE @CA2 AS VARCHAR(100)		0.5
-DECLARE @CA3 AS VARCHAR(100)		0.5
-DECLARE @Ph AS VARCHAR(20)		0.5
+REGEX::@\\w+\\s+INT		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\)		0.5
 SELECT CustomerID, FirstName, FamilyName, Phone, Address1, Address2, Address3		0.5
 FROM Customer		0.5
-WHERE CustomerID = @CID		1
-FETCH NEXT FROM @CustomerCursor INTO @CID, @CFiN, @CFaN, @Ph, @CA1, @CA2, @CA3		0.5
-PRINT 'CUSTOMER DETAILS:'		0.5
-PRINT ''		0.5
-PRINT 'Customer ID: ' + CONVERT(VARCHAR(10), @CID) + '        Phone: ' + @Ph		0.5
-PRINT 'Customer Name: ' + @CFiN + ' ' + @CFaN		0.5
-PRINT 'Address: ' + @CA1 + ', ' + @CA2 + ', ' + @CA3		0.5
-FETCH NEXT FROM @CustomerCursor INTO @CID, @CFiN, @CFaN, @Ph, @CA1, @CA2, @CA3		0.5
-EXEC CustomerDetails 1		0.5
+WHERE CustomerID = @\\w+		1
+REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
+REGEX::PRINT 'CUSTOMER DETAILS:'		0.5
+REGEX::PRINT ''		0.5
+REGEX::PRINT 'Customer ID: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s+\\+\\s+'        Phone: ' \\+ @\\w+		0.5
+REGEX::PRINT 'Customer Name: ' \\+ @\\w+\\s+\\+\\s+' ' \\+ @\\w+		0.5
+REGEX::PRINT 'Address: ' \\+ @\\w+\\s+\\+\\s+', ' \\+ @\\w+\\s+\\+\\s+', ' \\+ @\\w+		0.5
+REGEX::EXEC\\s+\\w+\\s+1		0.5
 		
 		
 		
 --Q12		
-@RID VARCHAR(20)		0.5
-DECLARE @Yr AS INT		0.5
-DECLARE @Mk AS VARCHAR(100)		0.5
-DECLARE @Md AS VARCHAR(100)		0.5
-DECLARE @Col AS VARCHAR(100)		0.5
-DECLARE @Own AS INT		0.5
-DECLARE @Km AS INT		0.5
-DECLARE @Pr AS MONEY		0.5
+REGEX::@\\w+\\s+VARCHAR\\(20\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+INT		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+INT		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+INT		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+MONEY		0.5
 SELECT RegistrationID, CarYear, Make, Model, ColourName, NumOwners, Kilometres, Price		0.5
 FROM Car JOIN LU_Colour		0.5
 ON Car.ColourID = LU_Colour.ColourID		0.5
-WHERE RegistrationID = @RID		1
-PRINT 'VEHICLE DETAILS:'		0.5
-PRINT ''		0.5
-PRINT 'Registration ID: ' + CONVERT(VARCHAR(10), @RID)		0.5
-PRINT 'Year: ' + CONVERT(VARCHAR(10), @Yr) + '       ' + 'Make: ' + @Mk + '       ' + 'Model: ' + @Md		0.5
-PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km'		0.5
-PRINT 'Price:  + CONVERT(VARCHAR(10), @Pr)		0.5
-FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr		0.5
-EXEC CarDetails 'ALP394'		0.5
+WHERE RegistrationID = @\\w+		1
+REGEX::PRINT 'VEHICLE DETAILS:'		0.5
+REGEX::PRINT ''		0.5
+REGEX::PRINT 'Registration ID: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)		0.5
+REGEX::PRINT 'Year: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s+\\+\\s+'       ' \\+ 'Make: ' \\+ @\\w+\\s+\\+\\s+'       ' \\+ 'Model: ' \\+ @\\w+		0.5
+REGEX::PRINT 'Colour: ' \\+ @\\w+\\s+\\+\\s+'       ' \\+ 'Owners: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s+\\+\\s+'       ' \\+ 'Kilometres: ' \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s+\\+\\s+'km'		0.5
+REGEX::PRINT 'Price:  \\+ CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)		0.5
+REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
+REGEX::EXEC\\s+\\w+\\s+'ALP394'		0.5
 
 
 --Q13		
-@SPID VARCHAR(20)		0.5
-DECLARE @FiN AS VARCHAR(100)		0.5
-DECLARE @FaN AS VARCHAR(100)		0.5
-DECLARE @Ph AS VARCHAR(100)		0.5
+REGEX::@\\w+\\s+VARCHAR\\(20\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
+REGEX::DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)		0.5
 SELECT SalespersonID, FirstName, FamilyName, Phone		1
 FROM Salesperson		0.5
-WHERE SalespersonID = @SPID		1
-FETCH NEXT FROM @SPCursor INTO @SPID, @FiN, @FaN, @Ph		0.5
-PRINT 'SALESPERSON DETAILS:'		0.5
-PRINT ''		0.5
-PRINT 'Salesperson ID: ' + @SPID + '        Phone: ' + @Ph		1
-PRINT 'Name: ' + @FiN + ' ' + @FaN		0.5
-FETCH NEXT FROM @SPCursor INTO @SPID, @FiN, @FaN, @Ph		0.5
-EXEC SalespersonDetails 1		1
+WHERE SalespersonID = @\\w+		1
+REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
+REGEX::PRINT 'SALESPERSON DETAILS:'		0.5
+REGEX::PRINT ''		0.5
+REGEX::PRINT 'Salesperson ID: ' \\+ @\\w+\\s+\\+\\s+'        Phone: ' \\+ @\\w+		1
+REGEX::PRINT 'Name: ' \\+ @\\w+\\s+\\+\\s+' ' \\+ @\\w+		0.5
+REGEX::FETCH NEXT FROM @\\w+ INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+		0.5
+REGEX::EXEC\\s+\\w+\\s+1		1
 		
 		
 		
 		
 		
 --Q14		
-CREATE FUNCTION KmToMiles (		1
-@km INT )		1
-RETURNS FLOAT		1
-AS		1
-BEGIN		1
-RETURN @km * 0.62		2
-END		1
-"CONVERT(VARCHAR(10), dbo.KmToMiles(@km)) + ' miles'	"		2
+REGEX::CREATE FUNCTION \\w+ \\(		1
+REGEX::@\\w+\\s+INT \\)		1
+REGEX::RETURNS FLOAT		1
+REGEX::AS		1
+REGEX::BEGIN		1
+REGEX::RETURN @\\w+\\s+\\*\\s+0\\.62		2
+REGEX::END		1
+REGEX::"CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.\\w+\\(@\\w+\\)\\)\\s+\\+\\s+' miles'	"		2
 `;
 
 export const parseMarkingSchedule = (scheduleText: string) => {
