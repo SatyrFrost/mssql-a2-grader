@@ -63,7 +63,7 @@ const AssignmentGrader = () => {
 
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
-    questionId: string,
+    rawQuestionId: string, // Renamed to rawQuestionId to distinguish from normalized
     studentSql: string,
     modelSql: string,
     studentResult: any,
@@ -72,6 +72,11 @@ const AssignmentGrader = () => {
     let score = 0;
     let maxScore = 0;
     const feedback: string[] = [];
+
+    // Normalize the questionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1")
+    const questionIdMatch = rawQuestionId.match(/--(Q\d+)/i);
+    const questionId = questionIdMatch ? questionIdMatch[1].toUpperCase() : rawQuestionId; // Use uppercase Q#
+
     const questionMarking = markingSchedule[questionId];
 
     if (!questionMarking) {
