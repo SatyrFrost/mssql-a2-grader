@@ -76,7 +76,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_VARCHAR100_CA1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CA2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CA3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR20_Ph": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\(20\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_PHONE": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:20|30)\\)", weight: 0.5 }, // Flexible for VARCHAR(20) or VARCHAR(30)
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM\\s+Customer", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s*=\\s*@\\w+", weight: 1.0 },
@@ -84,8 +84,8 @@ export const markingSchedule: {
     "REGEX::PRINT_DETAILS_HEADER": { regex: "PRINT\\s+'CUSTOMER\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "PRINT\\s+''", weight: 0.5 },
     "REGEX::PRINT_CID_PHONE": { regex: "PRINT\\s+'Customer\\s+ID:['\\s]*\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::PRINT_NAME": { regex: "PRINT\\s+'Customer\\s+Name:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*['\\s]*\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::PRINT_ADDRESS": { regex: "PRINT\\s+'Address:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*['\\s]*,\\s*['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*['\\s]*,\\s*['\\s]*\\s*\\+\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_NAME": { regex: "PRINT\\s+'Customer\\s+Name:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 }, // More flexible
+    "REGEX::PRINT_ADDRESS": { regex: "PRINT\\s+'Address:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 }, // More flexible
     "REGEX::FETCH_NEXT_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){6}", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 0.5 }
   },
