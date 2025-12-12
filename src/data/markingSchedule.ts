@@ -71,12 +71,12 @@ export const markingSchedule: {
   "Q11": {
     "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0.5 },
     "REGEX::PARAM_INT": { regex: "@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_CFiN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_CFaN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_CA1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_CA2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_CA3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR_PHONE": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:20|30)\\)", weight: 0.5 }, // Flexible for VARCHAR(20) or VARCHAR(30)
+    "REGEX::DECLARE_VARCHAR_CFiN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_CFaN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_CA1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_CA2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_CA3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_PHONE": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 }, // Now flexible for any VARCHAR length
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM\\s+Customer", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s*=\\s*@\\w+", weight: 1.0 },
@@ -84,17 +84,17 @@ export const markingSchedule: {
     "REGEX::PRINT_DETAILS_HEADER": { regex: "PRINT\\s+'CUSTOMER\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "PRINT\\s+''", weight: 0.5 },
     "REGEX::PRINT_CID_PHONE": { regex: "PRINT\\s+'Customer\\s+ID:['\\s]*\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::PRINT_NAME": { regex: "PRINT\\s+'Customer\\s+Name:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 }, // More flexible
-    "REGEX::PRINT_ADDRESS": { regex: "PRINT\\s+'Address:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 }, // More flexible
+    "REGEX::PRINT_NAME": { regex: "PRINT\\s+'Customer\\s+Name:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_ADDRESS": { regex: "PRINT\\s+'Address:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::FETCH_NEXT_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){6}", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 0.5 }
   },
   "Q12": {
-    "REGEX::PARAM_VARCHAR20": { regex: "@\\w+\\s+VARCHAR\\(20\\)", weight: 0.5 },
+    "REGEX::PARAM_VARCHAR": { regex: "@\\w+\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 }, // Flexible for any VARCHAR length
     "REGEX::DECLARE_INT": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+INT", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR100_3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_VARCHAR_3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
     "REGEX::DECLARE_INT_2": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+INT", weight: 0.5 },
     "REGEX::DECLARE_INT_3": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+INT", weight: 0.5 },
     "REGEX::DECLARE_MONEY": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+MONEY", weight: 0.5 },
@@ -113,10 +113,10 @@ export const markingSchedule: {
   },
   "Q13": {
     "REGEX::CREATE_PROCEDURE_HEADER_Q13": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0 },
-    "REGEX::PARAM_SPID_VARCHAR20": { regex: "@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 },
-    "REGEX::DECLARE_FiN_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
-    "REGEX::DECLARE_FaN_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
-    "REGEX::DECLARE_Ph_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::PARAM_SPID_VARCHAR": { regex: "@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 }, // Corrected to VARCHAR and flexible length
+    "REGEX::DECLARE_VARCHAR_FiN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 1 },
+    "REGEX::DECLARE_VARCHAR_FaN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 1 },
+    "REGEX::DECLARE_VARCHAR_Ph": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
     "SELECT SalespersonID, FirstName, FamilyName, Phone": 1,
     "FROM Salesperson": 0.5,
     "REGEX::WHERE_SALESPERSONID_SPID": { regex: "WHERE\\s+SalespersonID\\s+=\\s*@\\w+", weight: 1 },
