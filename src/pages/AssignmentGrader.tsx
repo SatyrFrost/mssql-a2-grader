@@ -32,7 +32,8 @@ interface QueryResult {
 }
 
 const AssignmentGrader = () => {
-  const [studentSql, setStudentSql] = useState<string>("");
+  const [studentSql, setStudentSql] = useState<string>(""); // Full content of the uploaded file (for display)
+  const [studentAnswersForGrading, setStudentAnswersForGrading] = useState<string>(""); // Only the question parts for grading
   const [fileName, setFileName] = useState<string>("");
   const [gradingResults, setGradingResults] = useState<QueryResult[] | null>(null);
   const [isGrading, setIsGrading] = useState<boolean>(false);
@@ -188,8 +189,19 @@ const AssignmentGrader = () => {
       setFileName(file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setStudentSql(content);
+        const fullContent = e.target?.result as string;
+        setStudentSql(fullContent); // Store full content for display
+
+        // Find the start of the actual questions (e.g., --Q1 or --Question1)
+        const questionStartRegex = /(^--Q\d+|^--Question\d+)/im; // Case-insensitive, multiline
+        const match = fullContent.match(questionStartRegex);
+
+        let answersOnlyContent = fullContent;
+        if (match && match.index !== undefined) {
+          answersOnlyContent = fullContent.substring(match.index);
+        }
+        setStudentAnswersForGrading(answersOnlyContent); // Store only answers for grading
+
         showSuccess("Student SQL file uploaded successfully!");
         setGradingResults(null); // Clear previous results on new upload
         setTotalScore(0);
@@ -203,7 +215,7 @@ const AssignmentGrader = () => {
   };
 
   const handleGradeAssignment = async () => {
-    if (!studentSql) {
+    if (!studentAnswersForGrading) { // Check if answers for grading exist
       showError("Please upload a student SQL file before grading.");
       return;
     }
@@ -215,16 +227,16 @@ const AssignmentGrader = () => {
     
     try {
       console.log("Calling edge function with payload sizes:", {
-        studentSqlLength: studentSql.length,
+        studentSqlLength: studentAnswersForGrading.length, // Use answers for grading
         modelAnswersSqlLength: modelAnswersSql.length,
         initialSqlSetupLength: initialSqlSetup.length
       });
       
       const { data, error } = await supabase.functions.invoke('grade-assignment', {
         body: {
-          studentSql,
+          studentSql: studentAnswersForGrading, // Pass only the extracted answers
           modelAnswersSql,
-          initialSqlSetup,
+          initialSqlSetup, // This is the canonical setup from src/data/initialSqlSetup.ts
         },
       });
 
