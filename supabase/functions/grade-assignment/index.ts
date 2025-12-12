@@ -129,11 +129,12 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
 
   for (const line of lines) {
     const trimmedLine = line.trim();
-    const questionMatch = trimmedLine.match(/^(--Q\d+)$/i);
+    // FIX: Update regex to match both --Q# and --Question#
+    const questionMatch = trimmedLine.match(/^(?:--Q\d+|--Question\d+)$/i); 
 
     if (questionMatch) {
       processBuffer(); // Process the previous question's buffer
-      currentQuestionId = questionMatch[1];
+      currentQuestionId = questionMatch[0]; // Use match[0] to get the full matched string (--Q1 or --Question1)
     } else {
       currentSqlBuffer.push(line);
     }
