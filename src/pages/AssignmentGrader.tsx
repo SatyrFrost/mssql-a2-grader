@@ -296,39 +296,6 @@ const AssignmentGrader = () => {
     }
   };
 
-  const renderResult = (resultsArray: any) => { // Renamed parameter to reflect it's an array
-    if (!resultsArray || resultsArray.length === 0) {
-      return <p className="text-muted-foreground">No query executed or result available.</p>;
-    }
-    
-    // If it's a single result (e.g., for simple SELECTs), wrap it in an array for consistency
-    const actualResults = Array.isArray(resultsArray) ? resultsArray : [resultsArray];
-
-    return (
-      <ScrollArea className="h-40 w-full border rounded-md p-2 bg-background space-y-2">
-        {actualResults.map((result, idx) => (
-          <div key={idx} className="pb-2 border-b last:border-b-0 border-muted-foreground/20">
-            {result.error ? (
-              <div className="text-red-500 text-sm">
-                <p>Error (Part {idx + 1}): {result.error}</p>
-                {result.sqlstate && <p>SQLSTATE: {result.sqlstate}</p>}
-              </div>
-            ) : result.status === 'success' ? (
-              <p className="text-green-600 text-sm">Part {idx + 1}: Query executed successfully.</p>
-            ) : result.hash ? (
-              <div className="text-sm">
-                <p>Part {idx + 1} Query Hash: <code className="font-mono text-xs">{result.hash.substring(0, 10)}...</code></p>
-                <p className="text-muted-foreground">Simulated output based on query content.</p>
-              </div>
-            ) : (
-              <pre className="text-xs whitespace-pre-wrap">Part {idx + 1}: {JSON.stringify(result, null, 2)}</pre>
-            )}
-          </div>
-        ))}
-      </ScrollArea>
-    );
-  };
-
   return (
     <ScrollArea className="h-screen w-full p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -369,9 +336,6 @@ const AssignmentGrader = () => {
             >
               {isGrading ? "Grading..." : "Grade Assignment"}
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Note: For T-SQL procedural questions (Q11-Q15), variable names, cursor names, and stored procedure names are flexible and do not need to match the model answer exactly, as long as the overall structure, data types, and logical flow are correct.
-            </p>
           </CardContent>
         </Card>
 
@@ -410,29 +374,23 @@ const AssignmentGrader = () => {
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-medium flex items-center gap-2">
-                        Student's Output
-                        <Badge variant="secondary">Query {index + 1}</Badge>
-                      </h4>
-                      {renderResult(item.student.result)}
-                      
                       <h5 className="font-medium mt-2">Student's SQL:</h5>
-                      <ScrollArea className="h-20 w-full border rounded-md p-2 bg-background">
-                        <pre className="text-xs whitespace-pre-wrap">{item.student.sql}</pre>
-                      </ScrollArea>
+                      <Textarea
+                        value={item.student.sql}
+                        readOnly
+                        rows={10}
+                        className="font-mono text-sm bg-background resize"
+                      />
                     </div>
                     
                     <div>
-                      <h4 className="font-medium flex items-center gap-2">
-                        Model Answer Output
-                        <Badge variant="secondary">Query {index + 1}</Badge>
-                      </h4>
-                      {renderResult(item.model.result)}
-                      
                       <h5 className="font-medium mt-2">Model Answer SQL:</h5>
-                      <ScrollArea className="h-20 w-full border rounded-md p-2 bg-background">
-                        <pre className="text-xs whitespace-pre-wrap">{item.model.sql}</pre>
-                      </ScrollArea>
+                      <Textarea
+                        value={item.model.sql}
+                        readOnly
+                        rows={10}
+                        className="font-mono text-sm bg-background resize"
+                      />
                     </div>
                   </div>
                   
@@ -442,36 +400,6 @@ const AssignmentGrader = () => {
             </CardContent>
           </Card>
         )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Initial SQL Setup (PostgreSQL)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={initialSqlSetup}
-                readOnly
-                rows={20}
-                className="font-mono text-sm bg-muted/50"
-              />
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Model Answers SQL</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={modelAnswersSql}
-                readOnly
-                rows={20}
-                className="font-mono text-sm bg-muted/50"
-              />
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </ScrollArea>
   );
