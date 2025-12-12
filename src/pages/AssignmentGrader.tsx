@@ -351,7 +351,7 @@ const AssignmentGrader = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {gradingResults.map((item, index) => (
-                <div key={index} className="border p-4 rounded-md bg-muted/40">
+                <div key={index} className="border p-4 rounded-md bg-muted/20">
                   <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
                     {displayQuestionTitle(item.question)}
                     {item.grade && (
