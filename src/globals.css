@@ -108,7 +108,7 @@
   }
 
   [data-radix-scroll-area-scrollbar] {
-    background-color: transparent !important; /* Transparent track */
+    background-color: hsl(var(--muted)) !important; /* Light grey track */
   }
 
   /* For native scrollbars (e.g., if ScrollArea is not used or for body scrollbar) */
@@ -124,12 +124,12 @@
   }
 
   ::-webkit-scrollbar-track {
-    background-color: transparent !important;
+    background-color: hsl(var(--muted)) !important; /* Light grey track */
   }
 
   /* For Firefox */
   html {
-    scrollbar-color: hsl(var(--foreground)) transparent; /* thumb track */
+    scrollbar-color: hsl(var(--foreground)) hsl(var(--muted)); /* thumb track */
     scrollbar-width: thin;
   }
 }

@@ -358,36 +358,4 @@ END
 GO 
 
 EXEC CarDetails2 'ALP394'
-
-
---Q15
-
-GO
-
-DROP PROCEDURE AddSale
-
-GO
-
-CREATE PROCEDURE AddSale
-(
-	@DateSold AS DATETIME, @SalesPersonID AS INT, @CustomerID AS INT, @RegistrationID AS VARCHAR(10)
-)
-
-AS
-
-BEGIN
-
-  INSERT INTO Sale(DateSold, Price, SalespersonID, CustomerID, RegistrationID) 
-	SELECT @DateSold, Car.Price, @SalespersonID, @CustomerID, @RegistrationID
-	FROM Car 
-	WHERE Car.RegistrationID = @RegistrationID
-
-
-END
-
-GO
-
-
-EXEC AddSale '2017-01-01', 1, 15, 'ZQP311'
-SELECT * FROM Sale
 `;
