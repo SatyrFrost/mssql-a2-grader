@@ -112,20 +112,21 @@ export const markingSchedule: {
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+\\w+\\s+'ALP394'", weight: 0.5 }
   },
   "Q13": {
-    "REGEX::PARAM_SPID_VARCHAR20": { regex: "@\\w+\\s+VARCHAR\\(20\\)", weight: 0.5 },
-    "REGEX::DECLARE_FIN_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_FAN_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_PH_VARCHAR100": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::PARAM_SID_INT": { regex: "@SID\\s+INT", weight: 0.5 },
+    "REGEX::DECLARE_SPID_INT": { regex: "DECLARE\\s+@SPID\\s+AS\\s+INT", weight: 1 },
+    "REGEX::DECLARE_SFname_VARCHAR100": { regex: "DECLARE\\s+@SFname\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::DECLARE_SFamName_VARCHAR100": { regex: "DECLARE\\s+@SFamName\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::DECLARE_SPh_VARCHAR100": { regex: "DECLARE\\s+@SPh\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "SELECT SalespersonID, FirstName, FamilyName, Phone": 1,
     "FROM Salesperson": 0.5,
-    "REGEX::WHERE_SALESPERSON_ID": { regex: "WHERE\\s+SalespersonID\\s+=\\s*@\\w+", weight: 1 },
-    "REGEX::FETCH_NEXT_SP_DETAILS": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+", weight: 0.5 },
-    "REGEX::PRINT_SALESPERSON_DETAILS_HEADER": { regex: "PRINT\\s+'SALESPERSON\\s+DETAILS:'", weight: 0.5 },
-    "REGEX::PRINT_EMPTY_LINE_3": { regex: "PRINT\\s+''", weight: 0.5 },
-    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 1 },
-    "REGEX::PRINT_SP_NAME": { regex: "PRINT\\s+'Name:\\s+'\\s*\\+\\s*@\\w+\\s+\\+\\s*'\\s+'\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::FETCH_NEXT_SP_DETAILS_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+", weight: 0.5 },
-    "REGEX::EXEC_SALESPERSON_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 1 }
+    "REGEX::WHERE_SALESPERSONID_SID": { regex: "WHERE\\s+SalespersonID\\s+=\\s*@SID", weight: 1 },
+    "REGEX::FETCH_NEXT_SP_DETAILS_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@SalespersonCursor\\s+INTO\\s+@SPID,\\s*@SFname,\\s*@SFamName,\\s*@SPh", weight: 0.5 },
+    "PRINT 'SALESPERSON DETAILS:'": 0.5,
+    "PRINT ''": 0.5,
+    "REGEX::PRINT_SPID_PHONE_NEW": { regex: "PRINT\\s+'Salesperson\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\(\\s*VARCHAR\\(10\\),\\s*@SPID\\s*\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*'Phone:\\s+'\\s*\\+\\s*@SPh", weight: 1 },
+    "REGEX::PRINT_SP_NAME_NEW": { regex: "PRINT\\s+'Name:\\s+'\\s*\\+\\s*@SFname\\s*\\+\\s*'\\s+'\\s*\\+\\s*@SFamName", weight: 0.5 },
+    "REGEX::FETCH_NEXT_SP_DETAILS_2_NEW": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@SalespersonCursor\\s+INTO\\s+@SPID,\\s*@SFname,\\s*@SFamName,\\s*@SPh", weight: 0.5 },
+    "EXEC SalespersonDetails 1": 1
   },
   "Q14": {
     "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+\\w+\\s+\\(`", weight: 1 },
