@@ -12,7 +12,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { markingSchedule } from "@/data/markingSchedule"; // Import the parsed marking schedule
+import { markingSchedule } from "@/data/markingSchedule"; // Import the new marking schedule object
 
 interface QueryResult {
   question: string;
@@ -65,8 +65,8 @@ const AssignmentGrader = () => {
     questionId: string,
     studentSql: string,
     modelSql: string,
-    studentResult: any, // This can now be an array
-    modelResult: any // This can now be an array
+    studentResult: any,
+    modelResult: any
   ): { score: number; maxScore: number; feedback: string[] } => {
     let score = 0;
     let maxScore = 0;
@@ -81,97 +81,93 @@ const AssignmentGrader = () => {
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
-    for (const [keyword, points] of Object.entries(questionMarking)) {
-      maxScore += points; // This is where maxScore is accumulated
-      
-      // Handle regex-based keywords with unique identifiers
-      if (keyword.startsWith('REGEX::')) {
-        const parts = keyword.split('::');
-        // Extract the actual regex pattern, skipping the 'REGEX' prefix and the unique ID
-        const regexPattern = parts.length > 2 ? parts.slice(2).join('::') : parts[1]; 
-        try {
-          const regex = new RegExp(regexPattern, 'is'); // 's' flag for dotall, 'i' for case-insensitive
-          if (regex.test(studentSql)) { // Test against the full studentSql
-            score += points;
-            feedback.push(`+${points} for matching pattern: \`${regexPattern}\`.`);
-          } else {
-            feedback.push(`-0 for not matching pattern: \`${regexPattern}\`.`);
-          }
-        } catch (e: any) {
-          feedback.push(`Error in regex pattern '${regexPattern}': ${e.message}`);
-        }
-        continue; // Move to the next keyword
-      }
+    for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
+      if (typeof ruleDefinition === 'number') {
+        // This is a simple keyword match or special case like [labels]
+        maxScore += ruleDefinition; // Add points to maxScore
 
-      // Existing logic for non-regex keywords (Q1-Q10)
-      if (keyword === '[labels]') {
-        // Special handling for Q5 aliases: check for presence of 'AS' keywords
-        if (questionId === 'Q5') {
-          const selectClauseMatch = studentSql.match(/SELECT\s+(.*?)\s+FROM/is);
-          if (selectClauseMatch && selectClauseMatch[1]) {
-            const selectContent = selectClauseMatch[1];
-            const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
-            if (asCount >= 5) { // Expecting 5 aliases for Q5 aggregate functions
-              score += points;
-              feedback.push(`+${points} for correctly including aliases for aggregate functions.`);
+        if (ruleName === '[labels]') {
+          // Special handling for Q5 aliases: check for presence of 'AS' keywords
+          if (questionId === 'Q5') {
+            const selectClauseMatch = studentSql.match(/SELECT\s+(.*?)\s+FROM/is);
+            if (selectClauseMatch && selectClauseMatch[1]) {
+              const selectContent = selectClauseMatch[1];
+              const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
+              if (asCount >= 5) { // Expecting 5 aliases for Q5 aggregate functions
+                score += ruleDefinition;
+                feedback.push(`+${ruleDefinition} for correctly including aliases for aggregate functions.`);
+              } else {
+                feedback.push(`-0 for missing or insufficient aliases for aggregate functions.`);
+              }
             } else {
-              feedback.push(`-0 for missing or insufficient aliases for aggregate functions.`);
+              feedback.push(`-0 for labels (could not parse SELECT clause for alias check).`);
             }
           } else {
-            feedback.push(`-0 for labels (could not parse SELECT clause for alias check).`);
+            // For other questions, if [labels] is used, it might still imply hash comparison
+            // but for now, we'll treat it as a general output correctness check.
+            // Given the user's feedback, we'll make this lenient.
+            // For now, if it's not Q5, we'll just give the point if the query executed without error.
+            const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
+            if (!studentHasError) {
+               score += ruleDefinition;
+               feedback.push(`+${ruleDefinition} for labels (query executed successfully).`);
+            } else {
+               feedback.push(`-0 for labels (query execution failed).`);
+            }
           }
-        } else {
-          // For other questions, if [labels] is used, it might still imply hash comparison
-          // but for now, we'll treat it as a general output correctness check.
-          // Given the user's feedback, we'll make this lenient.
-          // For now, if it's not Q5, we'll just give the point if the query executed without error.
-          const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
-          if (!studentHasError) {
-             score += points;
-             feedback.push(`+${points} for labels (query executed successfully).`);
+        } else if (ruleName.startsWith('JOIN ')) {
+          const joinNumber = parseInt(ruleName.split(' ')[1]);
+          const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+          if (joinCount >= joinNumber) {
+            score += ruleDefinition;
+            feedback.push(`+${ruleDefinition} for including at least ${joinNumber} 'JOIN' clause(s).`);
           } else {
-             feedback.push(`-0 for labels (query execution failed).`);
+            feedback.push(`-0 for missing the ${joinNumber}${joinNumber === 1 ? 'st' : joinNumber === 2 ? 'nd' : 'th'} 'JOIN' clause.`);
           }
-        }
-      } else if (keyword.startsWith('JOIN ')) {
-        const joinNumber = parseInt(keyword.split(' ')[1]);
-        const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
-        if (joinCount >= joinNumber) {
-          score += points;
-          feedback.push(`+${points} for including at least ${joinNumber} 'JOIN' clause(s).`);
+        } else if (ruleName.startsWith('AND ')) {
+          const andNumber = parseInt(ruleName.split(' ')[1]);
+          const andCount = countKeywordOccurrences(studentSqlLower, 'and');
+          if (andCount >= andNumber) {
+            score += ruleDefinition;
+            feedback.push(`+${ruleDefinition} for including at least ${andNumber} 'AND' clause(s).`);
+          } else {
+            feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
+          }
+        } else if (ruleName === 'WHERE .. NOT IN') {
+          if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
+            score += ruleDefinition;
+            feedback.push(`+${ruleDefinition} for 'WHERE ... NOT IN' clause.`);
+          } else {
+            feedback.push(`-0 for missing 'WHERE ... NOT IN' clause.`);
+          }
+        } else if (ruleName === 'Subquery') {
+          const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
+          if (normalizedStudentSql.includes(expectedSubquery)) {
+            score += ruleDefinition;
+            feedback.push(`+${ruleDefinition} for correct subquery '${expectedSubquery}'.`);
+          } else {
+            feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
+          }
+        } else if (studentSqlLower.includes(ruleName.toLowerCase())) {
+          score += ruleDefinition;
+          feedback.push(`+${ruleDefinition} for '${ruleName}'.`);
         } else {
-          feedback.push(`-0 for missing the ${joinNumber}${joinNumber === 1 ? 'st' : joinNumber === 2 ? 'nd' : 'th'} 'JOIN' clause.`);
+          feedback.push(`-0 for missing '${ruleName}'.`);
         }
-      } else if (keyword.startsWith('AND ')) {
-        const andNumber = parseInt(keyword.split(' ')[1]);
-        const andCount = countKeywordOccurrences(studentSqlLower, 'and');
-        if (andCount >= andNumber) {
-          score += points;
-          feedback.push(`+${points} for including at least ${andNumber} 'AND' clause(s).`);
-        } else {
-          feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
+      } else if (typeof ruleDefinition === 'object' && ruleDefinition !== null && 'regex' in ruleDefinition && 'weight' in ruleDefinition) {
+        // This is a REGEX rule
+        maxScore += ruleDefinition.weight; // Add points to maxScore
+        try {
+          const regex = new RegExp(ruleDefinition.regex, 'is'); // 's' flag for dotall, 'i' for case-insensitive
+          if (regex.test(studentSql)) { // Test against the full studentSql
+            score += ruleDefinition.weight;
+            feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleDefinition.regex}\`.`);
+          } else {
+            feedback.push(`-0 for not matching pattern: \`${ruleDefinition.regex}\`.`);
+          }
+        } catch (e: any) {
+          feedback.push(`Error in regex pattern '${ruleDefinition.regex}': ${e.message}`);
         }
-      } else if (keyword === 'WHERE .. NOT IN') {
-        if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
-          score += points;
-          feedback.push(`+${points} for 'WHERE ... NOT IN' clause.`);
-        } else {
-          feedback.push(`-0 for missing 'WHERE ... NOT IN' clause.`);
-        }
-      } else if (keyword === 'Subquery') {
-        const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
-        if (normalizedStudentSql.includes(expectedSubquery)) {
-          score += points;
-          feedback.push(`+${points} for correct subquery '${expectedSubquery}'.`);
-        } else {
-          feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
-        }
-      }
-      else if (studentSqlLower.includes(keyword.toLowerCase())) { // FIX: Changed keywordLower to keyword.toLowerCase()
-        score += points;
-        feedback.push(`+${points} for '${keyword}'.`);
-      } else {
-        feedback.push(`-0 for missing '${keyword}'.`);
       }
     }
 
