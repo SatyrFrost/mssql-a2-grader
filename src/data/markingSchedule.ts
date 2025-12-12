@@ -129,14 +129,13 @@ export const markingSchedule: {
     "REGEX::EXEC_SALESPERSON_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 1 }
   },
   "Q14": {
-    "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+\\w+\\s+\\(`", weight: 1 },
-    "REGEX::FUNCTION_PARAM_INT": { regex: "@\\w+\\s+INT\\s+\\)`", weight: 1 },
+    "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+KmToMiles\\s*\\(", weight: 1 },
+    "REGEX::FUNCTION_PARAM_INT": { regex: "@km\\s+INT\\s*\\)", weight: 1 },
     "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 1 },
     "REGEX::AS_KEYWORD": { regex: "AS", weight: 1 },
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1 },
-    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@\\w+\\s+\\*\\s+0\\.62", weight: 2 },
+    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s+\\*\\s+0\\.62", weight: 2 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1 },
-    "REGEX::PRINT_PRICE_Q14": { regex: "PRINT\\s+'Price:\\s*\\$'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)'", weight: 0.5 },
-    "REGEX::PRINT_MILEAGE": { regex: "CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.\\w+\\(@\\w+\\)\\)\\s+\\+\\s+' miles'", weight: 2 }
+    "REGEX::PRINT_MILEAGE": { regex: "CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.KmToMiles\\(@km\\)\\)\\s+\\+\\s+' miles'", weight: 2 }
   }
 };
