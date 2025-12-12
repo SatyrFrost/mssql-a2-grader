@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area"; // Keep import for potential internal use, but remove wrapper
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { initializeDatabase, executeQuery, closeDatabase } from "@/integrations/sqljs/db";
 import { sqlQuestionSetup } from "@/data/sqlQuestionSetup";
@@ -91,47 +91,45 @@ const SqlQuestion = () => {
   };
 
   return (
-    <ScrollArea className="h-screen w-full p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-center mb-8">SQL Question Editor</h1>
+    <div className="max-w-4xl mx-auto space-y-8 p-4 md:p-8"> {/* Removed ScrollArea wrapper */}
+      <h1 className="text-4xl font-bold text-center mb-8">SQL Question Editor</h1>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Enter Your SQL Query</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            placeholder="Type your SQL query here (e.g., SELECT * FROM Customer;)"
+            value={sqlInput}
+            onChange={(e) => setSqlInput(e.target.value)}
+            rows={10}
+            className="font-mono text-sm"
+            disabled={isLoading}
+          />
+          <Button onClick={handleRunQuery} className="w-full" disabled={isLoading}>
+            {isLoading ? "Initializing Database..." : "Run Query"}
+          </Button>
+          {!isLoading && (
+            <p className="text-sm text-muted-foreground">
+              Note: For single statements, a semicolon is optional. For multiple statements, only the first will execute without semicolons.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {queryResult && (
         <Card>
           <CardHeader>
-            <CardTitle>Enter Your SQL Query</CardTitle>
+            <CardTitle>Query Results</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              placeholder="Type your SQL query here (e.g., SELECT * FROM Customer;)"
-              value={sqlInput}
-              onChange={(e) => setSqlInput(e.target.value)}
-              rows={10}
-              className="font-mono text-sm"
-              disabled={isLoading}
-            />
-            <Button onClick={handleRunQuery} className="w-full" disabled={isLoading}>
-              {isLoading ? "Initializing Database..." : "Run Query"}
-            </Button>
-            {!isLoading && (
-              <p className="text-sm text-muted-foreground">
-                Note: For single statements, a semicolon is optional. For multiple statements, only the first will execute without semicolons.
-              </p>
-            )}
+          <CardContent>
+            {renderTable(queryResult)}
           </CardContent>
         </Card>
-
-        {queryResult && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Query Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderTable(queryResult)}
-            </CardContent>
-          </Card>
-        )}
-        <MadeWithDyad />
-      </div>
-    </ScrollArea>
+      )}
+      <MadeWithDyad />
+    </div>
   );
 };
 

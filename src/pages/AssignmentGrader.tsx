@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { initialSqlSetup } from "@/data/initialSqlSetup";
 import { modelAnswersSql } from "@/data/modelAnswersSql";
 import { Input } from "@/components/ui/input";
@@ -297,115 +296,113 @@ const AssignmentGrader = () => {
   };
 
   return (
-    <ScrollArea className="h-screen w-full p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
-        
+    <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8"> {/* Removed ScrollArea wrapper */}
+      <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Student SQL File</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Label htmlFor="student-sql-file">Choose a .txt or .sql file</Label>
+          <Input
+            id="student-sql-file"
+            type="file"
+            accept=".txt,.sql"
+            onChange={handleFileUpload}
+            className="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-md file:border-0
+              file:text-sm file:font-semibold
+              file:bg-primary file:text-primary-foreground
+              hover:file:bg-primary/90"
+          />
+          {fileName && <p className="text-sm text-muted-foreground">Uploaded: {fileName}</p>}
+          
+          <Textarea
+            placeholder="Student's SQL will appear here after upload..."
+            value={studentSql}
+            onChange={(e) => setStudentSql(e.target.value)}
+            rows={15}
+            className="font-mono text-sm"
+          />
+          
+          <Button 
+            onClick={handleGradeAssignment} 
+            className="w-full" 
+            disabled={isGrading}
+          >
+            {isGrading ? "Grading..." : "Grade Assignment"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {gradingResults && (
         <Card>
           <CardHeader>
-            <CardTitle>Upload Student SQL File</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+              Grading Results
+              <Badge variant="default" className="text-lg px-4 py-2">
+                Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)}
+              </Badge>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Label htmlFor="student-sql-file">Choose a .txt or .sql file</Label>
-            <Input
-              id="student-sql-file"
-              type="file"
-              accept=".txt,.sql"
-              onChange={handleFileUpload}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-primary file:text-primary-foreground
-                hover:file:bg-primary/90"
-            />
-            {fileName && <p className="text-sm text-muted-foreground">Uploaded: {fileName}</p>}
-            
-            <Textarea
-              placeholder="Student's SQL will appear here after upload..."
-              value={studentSql}
-              onChange={(e) => setStudentSql(e.target.value)}
-              rows={15}
-              className="font-mono text-sm"
-            />
-            
-            <Button 
-              onClick={handleGradeAssignment} 
-              className="w-full" 
-              disabled={isGrading}
-            >
-              {isGrading ? "Grading..." : "Grade Assignment"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {gradingResults && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                Grading Results
-                <Badge variant="default" className="text-lg px-4 py-2">
-                  Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {gradingResults.map((item, index) => (
-                <div 
-                  key={index} 
-                  className="border p-4 rounded-md" 
-                  style={{ backgroundColor: 'white' }}
-                >
-                  <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
-                    {displayQuestionTitle(item.question)}
-                    {item.grade && (
-                      <Badge variant="outline" className="text-md px-3 py-1">
-                        Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
-                      </Badge>
-                    )}
-                  </h3>
-                  
+          <CardContent className="space-y-6">
+            {gradingResults.map((item, index) => (
+              <div 
+                key={index} 
+                className="border p-4 rounded-md" 
+                style={{ backgroundColor: 'white' }}
+              >
+                <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
+                  {displayQuestionTitle(item.question)}
                   {item.grade && (
-                    <div className="mb-4">
-                      <h4 className="font-medium text-md mb-1">Feedback:</h4>
-                      <ul className="list-disc list-inside text-sm text-muted-foreground">
-                        {item.grade.feedback.map((f, i) => (
-                          <li key={i}>{f}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    <Badge variant="outline" className="text-md px-3 py-1">
+                      Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
+                    </Badge>
                   )}
+                </h3>
+                
+                {item.grade && (
+                  <div className="mb-4">
+                    <h4 className="font-medium text-md mb-1">Feedback:</h4>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {item.grade.feedback.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div>
-                      <h5 className="font-medium mt-2">Student's SQL:</h5>
-                      <Textarea
-                        value={item.student.sql}
-                        readOnly
-                        rows={10}
-                        className="font-mono text-sm bg-background resize"
-                      />
-                    </div>
-                    
-                    <div>
-                      <h5 className="font-medium mt-2">Model Answer SQL:</h5>
-                      <Textarea
-                        value={item.model.sql}
-                        readOnly
-                        rows={10}
-                        className="font-mono text-sm bg-background resize"
-                      />
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="font-medium mt-2">Student's SQL:</h5>
+                    <Textarea
+                      value={item.student.sql}
+                      readOnly
+                      rows={10}
+                      className="font-mono text-sm bg-background resize"
+                    />
                   </div>
                   
-                  {index < gradingResults.length - 1 && <Separator className="my-4" />}
+                  <div>
+                    <h5 className="font-medium mt-2">Model Answer SQL:</h5>
+                    <Textarea
+                      value={item.model.sql}
+                      readOnly
+                      rows={10}
+                      className="font-mono text-sm bg-background resize"
+                    />
+                  </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </ScrollArea>
+                
+                {index < gradingResults.length - 1 && <Separator className="my-4" />}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

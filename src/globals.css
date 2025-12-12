@@ -99,37 +99,25 @@
     @apply bg-background text-foreground;
   }
 
-  /* Force highly visible scrollbars for Radix UI ScrollArea */
-  [data-radix-scroll-area-thumb] {
-    background-color: red !important; /* Bright red thumb */
-    border-radius: 9999px !important; /* Fully rounded */
-    border: 1px solid transparent !important; /* Small border to separate from track */
-  }
-
-  [data-radix-scroll-area-scrollbar] {
-    background-color: yellow !important; /* Distinct yellow track */
-    width: 12px !important; /* Make it wider */
-  }
-
-  /* Fallback for native scrollbars (if any part of the page uses them) */
+  /* Aggressive styling for native scrollbars */
   ::-webkit-scrollbar {
-    width: 12px; /* Make it wider */
-    height: 12px;
+    width: 15px !important; /* Make it very wide */
+    height: 15px !important;
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: red !important; /* Bright red thumb */
-    border-radius: 9999px !important;
-    border: 1px solid transparent !important;
+    background-color: #FF0000 !important; /* Bright Red */
+    border-radius: 9999px !important; /* Fully rounded */
+    border: 3px solid #FFFF00 !important; /* Yellow border to make it pop */
   }
 
   ::-webkit-scrollbar-track {
-    background-color: yellow !important; /* Distinct yellow track */
+    background-color: #FFFF00 !important; /* Bright Yellow track */
   }
 
   /* For Firefox */
   html {
-    scrollbar-color: red yellow; /* thumb track */
-    scrollbar-width: thin; /* Firefox doesn't support scrollbar-width: 12px directly, 'thin' is the closest */
+    scrollbar-color: #FF0000 #FFFF00 !important; /* thumb track */
+    scrollbar-width: auto !important; /* Allow browser to determine width, or 'thin' if 'auto' is not enough */
   }
 }
