@@ -104,7 +104,7 @@ export const markingSchedule: {
     "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+RegistrationID\\s+=\\s*@\\w+", weight: 1 },
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "PRINT\\s+''", weight: 0.5 },
-    "REGEX::PRINT_REG_MAKE_MODEL": { regex: "PRINT\\s+'Registration\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_REG_MAKE_MODEL": { regex: "PRINT\\s+'Registration\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?Year:\\s+'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?Make:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Model:\\s+'\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::PRINT_COLOUR_OWNERS_KM": { regex: "PRINT\\s+'Colour:\\s+'\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'km'", weight: 0.5 },
     "REGEX::PRINT_PRICE": { regex: "PRINT\\s+'Price:\\s*\\$'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)", weight: 0.5 },
     "REGEX::FETCH_NEXT_CAR_DETAILS": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+", weight: 0.5 },
