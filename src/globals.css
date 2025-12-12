@@ -98,4 +98,38 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Override shadcn/ui ScrollArea scrollbar styling to make it more visible and default-like */
+  /* Target Radix UI scrollbar elements */
+  [data-radix-scroll-area-thumb] {
+    background-color: hsl(var(--foreground)) !important; /* Dark grey in light mode, light grey in dark mode */
+    border-radius: 9999px !important; /* Fully rounded */
+    border: 1px solid transparent !important; /* Small border to separate from track */
+  }
+
+  [data-radix-scroll-area-scrollbar] {
+    background-color: transparent !important; /* Transparent track */
+  }
+
+  /* For native scrollbars (e.g., if ScrollArea is not used or for body scrollbar) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--foreground)) !important; /* Dark grey in light mode, light grey in dark mode */
+    border-radius: 9999px !important;
+    border: 1px solid transparent !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent !important;
+  }
+
+  /* For Firefox */
+  html {
+    scrollbar-color: hsl(var(--foreground)) transparent; /* thumb track */
+    scrollbar-width: thin;
+  }
 }
