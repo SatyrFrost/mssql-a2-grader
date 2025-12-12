@@ -323,7 +323,7 @@ const AssignmentGrader = () => {
             placeholder="Student's SQL will appear here after upload..."
             value={studentSql}
             onChange={(e) => setStudentSql(e.target.value)}
-            rows={15}
+            rows={7} {/* Changed from 15 to 7 */}
             className="font-mono text-sm"
           />
           
