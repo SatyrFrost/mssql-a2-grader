@@ -107,7 +107,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: hsl(210 40% 80%) !important; /* Medium grey thumb */
+    background-color: hsl(210 40% 60%) !important; /* Darker grey thumb */
     border-radius: 9999px !important; /* Fully rounded */
     border: 3px solid hsl(210 40% 96.1%) !important; /* Light grey border to separate from track */
   }
@@ -118,7 +118,7 @@
 
   /* For Firefox */
   html {
-    scrollbar-color: hsl(210 40% 80%) hsl(210 40% 96.1%) !important; /* thumb track */
+    scrollbar-color: hsl(210 40% 60%) hsl(210 40% 96.1%) !important; /* thumb track */
     scrollbar-width: auto !important; /* Allow browser to determine width, or 'thin' if 'auto' is not enough */
   }
 }
