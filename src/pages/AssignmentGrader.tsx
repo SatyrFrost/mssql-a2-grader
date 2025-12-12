@@ -362,7 +362,7 @@ const AssignmentGrader = () => {
               {isGrading ? "Grading..." : "Grade Assignment"}
             </Button>
             <p className="text-sm text-muted-foreground">
-              Note: For T-SQL procedural questions (Q11-Q15), variable names (starting with '@') are flexible and do not need to match the model answer exactly, as long as the overall structure and data types are correct.
+              Note: For T-SQL procedural questions (Q11-Q15), variable names, cursor names, and stored procedure names are flexible and do not need to match the model answer exactly, as long as the overall structure, data types, and logical flow are correct.
             </p>
           </CardContent>
         </Card>
