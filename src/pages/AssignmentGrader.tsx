@@ -299,7 +299,7 @@ const AssignmentGrader = () => {
   return (
     <ScrollArea className="h-screen w-full p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment Grader</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
         
         <Card>
           <CardHeader>
@@ -351,7 +351,11 @@ const AssignmentGrader = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {gradingResults.map((item, index) => (
-                <div key={index} className="border p-4 rounded-md bg-muted/20">
+                <div 
+                  key={index} 
+                  className="border p-4 rounded-md" 
+                  style={{ backgroundColor: 'hsl(0deg 0% 61.27% / 20%)' }}
+                >
                   <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
                     {displayQuestionTitle(item.question)}
                     {item.grade && (
