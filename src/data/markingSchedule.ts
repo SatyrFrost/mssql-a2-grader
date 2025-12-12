@@ -113,8 +113,8 @@ export const markingSchedule: {
   },
   "Q13": {
     "REGEX::PARAM_SPID_VARCHAR20": { regex: "@SPID\\s+VARCHAR\\(20\\)", weight: 0.5 },
-    "REGEX::DECLARE_FiN_VARCHAR100": { regex: "DECLARE\\s+@FiN\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
-    "REGEX::DECLARE_FaN_VARCHAR100": { regex: "DECLARE\\s+@FaN\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
+    "REGEX::DECLARE_FiN_VARCHAR100": { regex: "DECLARE\\s+@FiN\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
+    "REGEX::DECLARE_FaN_VARCHAR100": { regex: "DECLARE\\s+@FaN\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
     "REGEX::DECLARE_Ph_VARCHAR100": { regex: "DECLARE\\s+@Ph\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "SELECT SalespersonID, FirstName, FamilyName, Phone": 1,
     "FROM Salesperson": 0.5,
@@ -122,7 +122,7 @@ export const markingSchedule: {
     "REGEX::FETCH_NEXT_SP_DETAILS_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@SPCursor\\s+INTO\\s+@SPID,\\s*@FiN,\\s*@FaN,\\s*@Ph", weight: 0.5 },
     "PRINT 'SALESPERSON DETAILS:'": 0.5,
     "PRINT ''": 0.5,
-    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:\\s+'\\s*\\+\\s*@SPID\\s*\\+\\s*'.*?'\\s*\\+\\s*'Phone:\\s+'\\s*\\+\\s*@Ph", weight: 1 },
+    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:\\s+'\\s*\\+\\s*@SPID\\s*\\+\\s*'\\s{8}Phone:\\s+'\\s*\\+\\s*@Ph", weight: 1 },
     "REGEX::PRINT_SP_NAME": { regex: "PRINT\\s+'Name:\\s+'\\s*\\+\\s*@FiN\\s*\\+\\s*'\\s+'\\s*\\+\\s*@FaN", weight: 0.5 },
     "REGEX::FETCH_NEXT_SP_DETAILS_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@SPCursor\\s+INTO\\s+@SPID,\\s*@FiN,\\s*@FaN,\\s*@Ph", weight: 0.5 },
     "EXEC SalespersonDetails 1": 1
