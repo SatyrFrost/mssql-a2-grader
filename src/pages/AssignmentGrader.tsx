@@ -54,16 +54,16 @@ const AssignmentGrader = () => {
 
   // Helper function to format question titles for display
   const displayQuestionTitle = (questionText: string) => {
-    const match = questionText.match(/--(Q\d+)/);
+    const match = questionText.match(/--(Q\d+)/i); // Case-insensitive match for --Q# or --Question#
     if (match && match[1]) {
-      return `Question ${match[1].substring(1)}`; // Extract just the number from Q1, Q2, etc.
+      return `Question ${match[1].replace(/question/i, 'Q').substring(1)}`; // Extract just the number from Q1, Q2, etc.
     }
     return questionText; // Fallback if format doesn't match
   };
 
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
-    rawQuestionId: string, // Renamed to rawQuestionId to distinguish from normalized
+    rawQuestionId: string,
     studentSql: string,
     modelSql: string,
     studentResult: any,
@@ -73,9 +73,12 @@ const AssignmentGrader = () => {
     let maxScore = 0;
     const feedback: string[] = [];
 
-    // Normalize the questionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1")
+    // Normalize the rawQuestionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1", "--Question11" -> "Q11")
     const questionIdMatch = rawQuestionId.match(/--(Q\d+)/i);
-    const questionId = questionIdMatch ? questionIdMatch[1].toUpperCase() : rawQuestionId; // Use uppercase Q#
+    let questionId = rawQuestionId;
+    if (questionIdMatch && questionIdMatch[1]) {
+      questionId = questionIdMatch[1].toUpperCase(); // This will give "Q1", "Q11", etc.
+    }
 
     const questionMarking = markingSchedule[questionId];
 
@@ -268,11 +271,11 @@ const AssignmentGrader = () => {
         showSuccess("Assignment graded successfully!");
         const gradedResults = data.results.map((item: QueryResult) => {
           // Extract question ID like "Q1", "Q2", etc. from "--Q1", "--Q2", etc.
-          const questionIdMatch = item.question.match(/--(Q\d+)/);
-          const questionId = questionIdMatch ? questionIdMatch[1] : item.question; // Fallback to full question text if no match
+          const questionIdMatch = item.question.match(/--(Q\d+)/i);
+          const questionId = questionIdMatch ? questionIdMatch[1].toUpperCase() : item.question; // Fallback to full question text if no match
           
           const grade = calculateQuestionGrade(
-            questionId,
+            questionId, // Pass the normalized questionId to the grading function
             item.student.sql,
             item.model.sql,
             item.student.result,
