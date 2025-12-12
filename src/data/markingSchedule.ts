@@ -112,7 +112,7 @@ export const markingSchedule: {
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+\\w+\\s+'ALP394'", weight: 0.5 }
   },
   "Q13": {
-    "REGEX::CREATE_PROCEDURE_HEADER_Q13": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0.5 },
+    "REGEX::CREATE_PROCEDURE_HEADER_Q13": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0 },
     "REGEX::PARAM_SPID_VARCHAR20": { regex: "@SPID\\s+VARCHAR\\(20\\)", weight: 0.5 },
     "REGEX::DECLARE_FiN_VARCHAR100": { regex: "DECLARE\\s+@FiN\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
     "REGEX::DECLARE_FaN_VARCHAR100": { regex: "DECLARE\\s+@FaN\\s+AS\\s+VARCHAR\\(100\\)", weight: 1 },
