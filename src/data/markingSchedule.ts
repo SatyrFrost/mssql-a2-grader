@@ -69,8 +69,8 @@ export const markingSchedule: {
     "FROM": 1
   },
   "Q11": {
-    "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\(`", weight: 0.5 },
-    "REGEX::PARAM_INT": { regex: "@\\w+\\s+INT", weight: 0.5 },
+    "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0.5 }, // Updated regex for newline flexibility
+    "REGEX::PARAM_INT": { regex: "@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 }, // Updated regex to allow 'AS'
     "REGEX::DECLARE_VARCHAR100_CFiN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CFaN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CA1": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
