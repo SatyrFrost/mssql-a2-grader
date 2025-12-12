@@ -56,7 +56,11 @@ const AssignmentGrader = () => {
   const displayQuestionTitle = (questionText: string) => {
     const match = questionText.match(/--(Q\d+)/i); // Case-insensitive match for --Q# or --Question#
     if (match && match[1]) {
-      return `Question ${match[1].replace(/question/i, 'Q').substring(1)}`; // Extract just the number from Q1, Q2, etc.
+      // Extract just the number and prepend 'Question '
+      const questionNumberMatch = match[1].match(/\d+/);
+      if (questionNumberMatch) {
+        return `Question ${questionNumberMatch[0]}`;
+      }
     }
     return questionText; // Fallback if format doesn't match
   };
@@ -74,10 +78,10 @@ const AssignmentGrader = () => {
     const feedback: string[] = [];
 
     // Normalize the rawQuestionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1", "--Question11" -> "Q11")
-    const questionIdMatch = rawQuestionId.match(/--(Q\d+)/i);
-    let questionId = rawQuestionId;
-    if (questionIdMatch && questionIdMatch[1]) {
-      questionId = questionIdMatch[1].toUpperCase(); // This will give "Q1", "Q11", etc.
+    const questionNumberMatch = rawQuestionId.match(/Q(\d+)/i); // Capture the number after 'Q'
+    let questionId = rawQuestionId; // Default to raw if no match
+    if (questionNumberMatch && questionNumberMatch[1]) {
+      questionId = `Q${questionNumberMatch[1]}`; // Reconstruct as "Q1", "Q11", etc.
     }
 
     const questionMarking = markingSchedule[questionId];
@@ -271,11 +275,12 @@ const AssignmentGrader = () => {
         showSuccess("Assignment graded successfully!");
         const gradedResults = data.results.map((item: QueryResult) => {
           // Extract question ID like "Q1", "Q2", etc. from "--Q1", "--Q2", etc.
-          const questionIdMatch = item.question.match(/--(Q\d+)/i);
-          const questionId = questionIdMatch ? questionIdMatch[1].toUpperCase() : item.question; // Fallback to full question text if no match
+          // This ensures it matches the markingSchedule keys (e.g., "Q1", "Q11")
+          const questionNumberMatch = item.question.match(/Q(\d+)/i);
+          const normalizedQuestionId = questionNumberMatch && questionNumberMatch[1] ? `Q${questionNumberMatch[1]}` : item.question;
           
           const grade = calculateQuestionGrade(
-            questionId, // Pass the normalized questionId to the grading function
+            normalizedQuestionId, // Pass the correctly normalized questionId
             item.student.sql,
             item.model.sql,
             item.student.result,
@@ -343,7 +348,7 @@ const AssignmentGrader = () => {
           <Textarea
             placeholder="Student's SQL will appear here after upload..."
             value={studentSql}
-            onChange={(e) => setStudentSql(e.target.value)}
+            onChange={(e) => setSqlInput(e.target.value)}
             rows={7}
             className="font-mono text-sm"
           />
