@@ -102,7 +102,7 @@ REGEX::PRINT_VEHICLE_DETAILS_HEADER::PRINT\\s+'VEHICLE\\s+DETAILS:' 0.5
 REGEX::PRINT_EMPTY_LINE_2::PRINT\\s+'' 0.5
 REGEX::PRINT_REG_MAKE_MODEL::PRINT\\s+'Registration\\s+ID:\\s+'\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)\\s+\\+\\s+'\\s+Make:\\s+'\\s*\\+\\s*@\\w+\\s+\\+\\s+'\\s+Model:\\s+'\\s*\\+\\s*@\\w+ 0.5
 REGEX::PRINT_COLOUR_OWNERS_KM::PRINT\\s+'Colour:\\s+'\\s*\\+\\s*@\\w+\\s+\\+\\s+'\\s+Owners:\\s+'\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)\\s+\\+\\s+'\\s+Kilometres:\\s+'\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)\\s+\\+\\s+'km' 0.5
-REGEX::PRINT_PRICE::PRINT\\s+'Price:\\s+\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)` 0.5
+REGEX::PRINT_PRICE::PRINT\\s+'Price:\\s+\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)' 0.5
 REGEX::FETCH_NEXT_CAR_DETAILS::FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+ 0.5
 REGEX::EXEC_CAR_DETAILS::EXEC\\s+\\w+\\s+'ALP394' 0.5
 
@@ -130,7 +130,7 @@ REGEX::AS_KEYWORD::AS 1
 REGEX::BEGIN_KEYWORD::BEGIN 1
 REGEX::RETURN_CALCULATION::RETURN\\s+@\\w+\\s+\\*\\s+0\\\\.62 2
 REGEX::END_KEYWORD::END 1
-REGEX::PRINT_PRICE_Q14::PRINT\\s+'Price:\\s+\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)` 0.5
+REGEX::PRINT_PRICE_Q14::PRINT\\s+'Price:\\s+\\s*\\+\\s*CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s*@\\w+\\\\)' 0.5
 REGEX::PRINT_MILEAGE::CONVERT\\\\(VARCHAR\\\\(10\\\\),\\s+dbo\\\\.\\\\w+\\\\(@\\w+\\\\)\\\\)\\s+\\+\\s+' miles' 2
 `;
 
