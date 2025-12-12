@@ -54,13 +54,9 @@ const AssignmentGrader = () => {
 
   // Helper function to format question titles for display
   const displayQuestionTitle = (questionText: string) => {
-    const match = questionText.match(/--(Q\d+)/i); // Case-insensitive match for --Q# or --Question#
+    const match = questionText.match(/--(?:Q|Question)(\d+)/i); // Match --Q# or --Question# and capture the number
     if (match && match[1]) {
-      // Extract just the number and prepend 'Question '
-      const questionNumberMatch = match[1].match(/\d+/);
-      if (questionNumberMatch) {
-        return `Question ${questionNumberMatch[0]}`;
-      }
+      return `Question ${match[1]}`; // Use the captured number
     }
     return questionText; // Fallback if format doesn't match
   };
@@ -78,10 +74,10 @@ const AssignmentGrader = () => {
     const feedback: string[] = [];
 
     // Normalize the rawQuestionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1", "--Question11" -> "Q11")
-    const questionNumberMatch = rawQuestionId.match(/Q(\d+)/i); // Capture the number after 'Q'
-    let questionId = rawQuestionId; // Default to raw if no match
-    if (questionNumberMatch && questionNumberMatch[1]) {
-      questionId = `Q${questionNumberMatch[1]}`; // Reconstruct as "Q1", "Q11", etc.
+    const questionIdMatch = rawQuestionId.match(/--(?:Q|Question)(\d+)/i); // Match --Q# or --Question# and capture the number
+    let questionId = rawQuestionId;
+    if (questionIdMatch && questionIdMatch[1]) {
+      questionId = `Q${questionIdMatch[1]}`; // Reconstruct as "Q1", "Q11", etc.
     }
 
     const questionMarking = markingSchedule[questionId];
@@ -275,9 +271,8 @@ const AssignmentGrader = () => {
         showSuccess("Assignment graded successfully!");
         const gradedResults = data.results.map((item: QueryResult) => {
           // Extract question ID like "Q1", "Q2", etc. from "--Q1", "--Q2", etc.
-          // This ensures it matches the markingSchedule keys (e.g., "Q1", "Q11")
-          const questionNumberMatch = item.question.match(/Q(\d+)/i);
-          const normalizedQuestionId = questionNumberMatch && questionNumberMatch[1] ? `Q${questionNumberMatch[1]}` : item.question;
+          const questionIdMatch = item.question.match(/--(?:Q|Question)(\d+)/i);
+          const normalizedQuestionId = questionIdMatch && questionIdMatch[1] ? `Q${questionIdMatch[1]}` : item.question;
           
           const grade = calculateQuestionGrade(
             normalizedQuestionId, // Pass the correctly normalized questionId
