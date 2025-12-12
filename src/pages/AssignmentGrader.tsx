@@ -115,6 +115,14 @@ const AssignmentGrader = () => {
                feedback.push(`-0 for labels (query execution failed).`);
             }
           }
+        } else if (ruleName === 'JOIN' && questionId === 'Q4') { // Specific check for Q4's JOIN rule
+          const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+          if (joinCount >= 1) { // Check for at least one JOIN
+            score += ruleDefinition;
+            feedback.push(`+${ruleDefinition} for including a 'JOIN' clause.`);
+          } else {
+            feedback.push(`-0 for missing a 'JOIN' clause.`);
+          }
         } else if (ruleName.startsWith('JOIN ')) {
           const joinNumber = parseInt(ruleName.split(' ')[1]);
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');

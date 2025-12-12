@@ -24,7 +24,7 @@ export const markingSchedule: {
   "Q4": {
     "SELECT": 1,
     "FROM": 1,
-    "JOIN 2": 1
+    "JOIN": 2 // Changed name and weight to reflect a single join worth 2 marks
   },
   "Q5": {
     "MAX": 0.5,
@@ -69,7 +69,7 @@ export const markingSchedule: {
     "FROM": 1
   },
   "Q11": {
-    "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\(`", weight: 0.5 }, // Changed regex, kept weight 0.5
+    "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\(`", weight: 0.5 },
     "REGEX::PARAM_INT": { regex: "@\\w+\\s+INT", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CFiN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR100_CFaN": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
@@ -79,7 +79,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_VARCHAR20_Ph": { regex: "DECLARE\\s+@\\w+\\s+AS\\s+VARCHAR\\(20\\)", weight: 0.5 },
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
-    "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s+=\\s*@\\w+", weight: 1.0 }, // Changed from 1.5 to 1.0
+    "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s+=\\s*@\\w+", weight: 1.0 },
     "REGEX::FETCH_NEXT_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+\\s*", weight: 0.5 },
     "REGEX::PRINT_DETAILS_HEADER": { regex: "PRINT\\s+'CUSTOMER\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "PRINT\\s+''", weight: 0.5 },
