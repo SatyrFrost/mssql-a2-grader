@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { initializeDatabase, executeQuery, closeDatabase } from "@/integrations/sqljs/db";
 import { sqlQuestionSetup } from "@/data/sqlQuestionSetup";
 import { showSuccess, showError } from "@/utils/toast";
-import { MadeWithDyad } from "@/components/made-with-dyad";
+
 
 interface QueryResult {
   columns: string[];
@@ -128,7 +128,6 @@ const SqlQuestion = () => {
           </CardContent>
         </Card>
       )}
-      <MadeWithDyad />
     </div>
   );
 };

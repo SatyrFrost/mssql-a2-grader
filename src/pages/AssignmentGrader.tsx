@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { markingSchedule } from "@/data/markingSchedule"; // Import the new marking schedule object
-import { MadeWithDyad } from "@/components/made-with-dyad"; // Import MadeWithDyad
+ // Import MadeWithDyad
 
 interface QueryResult {
   question: string;
@@ -423,7 +423,6 @@ const AssignmentGrader = () => {
           </CardContent>
         </Card>
       )}
-      <MadeWithDyad />
     </div>
   );
 };
