@@ -99,9 +99,9 @@ export const markingSchedule: {
     "REGEX::DECLARE_INT_3": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 },
     "REGEX::DECLARE_MONEY": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?MONEY", weight: 0.5 },
     "REGEX::SELECT_CAR_DETAILS": { regex: "SELECT\\s+(?:Car\\.)?RegistrationID\\s*,\\s*(?:Car\\.)?CarYear\\s*,\\s*(?:Car\\.)?Make\\s*,\\s*(?:Car\\.)?Model\\s*,\\s*(?:LU_Colour\\.)?ColourName\\s*,\\s*(?:Car\\.)?NumOwners\\s*,\\s*(?:Car\\.)?Kilometres\\s*,\\s*(?:Car\\.)?Price", weight: 0.5 },
-    "REGEX::FROM_CAR_JOIN_LU_COLOUR": { regex: "FROM\\s+Car\\s+(?:INNER\\s+)?JOIN\\s+LU_Colour", weight: 0.5 }, // Flexible for INNER JOIN and multi-line
+    "REGEX::FROM_CAR_JOIN_LU_COLOUR": { regex: "FROM\\s+Car\\s+(?:INNER\\s+)?JOIN\\s+LU_Colour", weight: 0.5 },
     "ON Car.ColourID = LU_Colour.ColourID": 0.5,
-    "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+RegistrationID\\s*=\\s*@\\w+", weight: 1 },
+    "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@\\w+\\s*;?", weight: 1 }, // Updated for flexibility
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "PRINT\\s+''", weight: 0.5 },
     "REGEX::PRINT_REGISTRATION_ID": { regex: "PRINT\\s+'Registration\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\(10\\),\\s*)?@\\w+(?:\\))?", weight: 0.25 },
