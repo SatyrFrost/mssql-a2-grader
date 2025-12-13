@@ -134,8 +134,8 @@ export const markingSchedule: {
     "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 1 },
     "REGEX::AS_KEYWORD": { regex: "AS", weight: 1 },
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1 },
-    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s+\\*\\s+0\\.62", weight: 2 },
+    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s*\\*\\s*0\\.62", weight: 2 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1 },
-    "REGEX::PRINT_MILEAGE": { regex: "Mileage:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*\\+\\s+' miles'", weight: 2 }
+    "REGEX::PRINT_MILEAGE": { regex: "Mileage:\\s*['\"]?\\s*\\+\\s*(?:CAST\\s*\\(\\s*(?:@\\w+|dbo\\.KmToMiles\\(@\\w+\\))\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\)|CONVERT\\s*\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*(?:@\\w+|dbo\\.KmToMiles\\(@\\w+\\))\\s*\\))\\s*\\+\\s*['\"]?\\s*miles['\"]?", weight: 2 }
   }
 };
