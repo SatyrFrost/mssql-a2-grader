@@ -86,19 +86,20 @@ AS
 BEGIN
 
    --Declare the variables   
-   DECLARE @CFiN AS VARCHAR(100)
-   DECLARE @CFaN AS VARCHAR(100)
+   DECLARE @CustID AS INT
+   DECLARE @CPh AS VARCHAR(100)
+   DECLARE @CFName AS VARCHAR(100)
+   DECLARE @CFamName AS VARCHAR(100)
    DECLARE @CA1 AS VARCHAR(100)
    DECLARE @CA2 AS VARCHAR(100)
    DECLARE @CA3 AS VARCHAR(100)
-   DECLARE @Ph AS VARCHAR(20)
 
    --Declare the cursor
    DECLARE @CustomerCursor AS CURSOR
 
    --Put a query in the cursor
    SET @CustomerCursor = CURSOR FOR 
-      SELECT CustomerID, FirstName, FamilyName, Phone, Address1, Address2, Address3
+      SELECT CustomerID, FirstName, FamilyName, Address1, Address2, Address3, Phone
       FROM Customer
       WHERE CustomerID = @CID
 
@@ -106,7 +107,7 @@ BEGIN
    OPEN @CustomerCursor
 
    --Get the first row
-   FETCH NEXT FROM @CustomerCursor INTO @CID, @CFiN, @CFaN, @Ph, @CA1, @CA2, @CA3
+   FETCH NEXT FROM @CustomerCursor INTO @CustID, @CFName, @CFamName, @CA1, @CA2, @CA3, @CPh
 	
    PRINT 'CUSTOMER DETAILS:'
    PRINT ''
@@ -114,11 +115,11 @@ BEGIN
    --Loop until there are no more rows
    WHILE @@FETCH_STATUS = 0
       BEGIN		 		
-		 PRINT 'Customer ID: ' + CONVERT(VARCHAR(10), @CID) + '        Phone: ' + @Ph
-		 PRINT 'Customer Name: ' + @CFiN + ' ' + @CFaN
+		 PRINT 'Customer ID: ' + CONVERT(VARCHAR(10), @CustID)  + '        Phone: ' + @CPh
+		 PRINT 'Customer Name: ' + @CFName + ' ' + @CFamName
 		 PRINT 'Address: ' + @CA1 + ', ' + @CA2 + ', ' + @CA3
 		 PRINT ''
-		 FETCH NEXT FROM @CustomerCursor INTO @CID, @CFiN, @CFaN, @Ph, @CA1, @CA2, @CA3
+		 FETCH NEXT FROM @CustomerCursor INTO @CustID, @CPh, @CFName, @CFamName, @CA1, @CA2, @CA3
 	END
 
    --Close the cursor
@@ -145,7 +146,7 @@ GO
 
 CREATE PROCEDURE CarDetails
 (
-   @RID VARCHAR(20)
+   @RID VARCHAR(10)
 )
 
 AS
@@ -153,29 +154,30 @@ AS
 BEGIN
 
    --Declare the variables   
-   DECLARE @Yr AS INT
-   DECLARE @Mk AS VARCHAR(100)
-   DECLARE @Md AS VARCHAR(100)
-   DECLARE @Col AS VARCHAR(100)
-   DECLARE @Own AS INT
-   DECLARE @Km AS INT
-   DECLARE @Pr AS MONEY
+   DECLARE @RegID AS VARCHAR(10)
+   DECLARE @CColour AS VARCHAR(100)
+   DECLARE @CMake AS VARCHAR(100)
+   DECLARE @CModel AS VARCHAR(100)
+   DECLARE @CYear AS INT
+   DECLARE @CNumOwn AS INT
+   DECLARE @CPrice AS MONEY
+   DECLARE @CKm AS INT
 
    --Declare the cursor
    DECLARE @CarCursor AS CURSOR
 
    --Put a query in the cursor
    SET @CarCursor = CURSOR FOR 
-      SELECT RegistrationID, CarYear, Make, Model, ColourName, NumOwners, Kilometres, Price
-      FROM Car JOIN LU_Colour
-      ON Car.ColourID = LU_Colour.ColourID
-      WHERE RegistrationID = @RID
+      SELECT RegistrationID, ColourName, Make, Model, CarYear, NumOwners, Price, Kilometres
+      FROM Car, LU_Colour
+      WHERE Car.ColourID = LU_Colour.ColourID
+      AND RegistrationID = @RID
 
    --Open the cursor
    OPEN @CarCursor
 
    --Get the first row
-   FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr
+   FETCH NEXT FROM @CarCursor INTO @RegID, @CColour, @CMake, @CModel, @CYear, @CNumOwn, @CPrice, @CKm
 	
    PRINT 'VEHICLE DETAILS:'
    PRINT ''
@@ -183,12 +185,12 @@ BEGIN
    --Loop until there are no more rows
    WHILE @@FETCH_STATUS = 0
       BEGIN		 
-		 PRINT 'Registration ID: ' + CONVERT(VARCHAR(10), @RID)
-		 PRINT 'Year: ' + CONVERT(VARCHAR(10), @Yr) + '       ' + 'Make: ' + @Mk + '       ' + 'Model: ' + @Md
-		 PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km'	
-		 PRINT 'Price: $' + CONVERT(VARCHAR(10), @Pr)
+		 PRINT 'Registration ID: ' + @RegID 
+		 PRINT 'Year: ' + CONVERT(VARCHAR(10), @CYear) + '       ' + 'Make: ' + @CMake + '       ' + 'Model: ' + @CModel
+		 PRINT 'Colour: ' + @CColour + '       ' + 'Owners: ' + CONVERT( VARCHAR(10), @CNumOwn ) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10), @CKm  ) + 'km'
+		 PRINT 'Price: $' + CONVERT(VARCHAR(10), @CPrice) 
 	     PRINT ''
-		 FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr
+		 FETCH NEXT FROM @CarCursor INTO @RegID, @CColour, @CMake, @CModel, @CYear, @CNumOwn, @CPrice, @CKm
 	END
 
    --Close the cursor
@@ -214,7 +216,7 @@ GO
 
 CREATE PROCEDURE SalespersonDetails
 (
-   @SPID VARCHAR(20)
+   @SID INT
 )
 
 AS
@@ -222,24 +224,25 @@ AS
 BEGIN
 
    --Declare the variables     
-   DECLARE @FiN AS VARCHAR(100)
-   DECLARE @FaN AS VARCHAR(100)
-   DECLARE @Ph AS VARCHAR(100)
+   DECLARE @SPID AS INT
+   DECLARE @SFname AS VARCHAR(100)
+   DECLARE @SFamName AS VARCHAR(100)
+   DECLARE @SPh AS VARCHAR(100)
 
    --Declare the cursor
-   DECLARE @SPCursor AS CURSOR
+   DECLARE @SalespersonCursor AS CURSOR
 
    --Put a query in the cursor
-   SET @SPCursor = CURSOR FOR 
-      SELECT SalesPersonID, FirstName, FamilyName, Phone
+   SET @SalespersonCursor = CURSOR FOR 
+      SELECT SalespersonID, FirstName, FamilyName, Phone
       FROM SalesPerson
-      WHERE SalesPersonID = @SPID
+      WHERE SalespersonID = @SID
 
    --Open the cursor
-   OPEN @SPCursor
+   OPEN @SalespersonCursor
 
    --Get the first row
-   FETCH NEXT FROM @SPCursor INTO @SPID, @FiN, @FaN, @Ph
+   FETCH NEXT FROM @SalespersonCursor INTO @SPID, @SFname, @SFamName, @SPh
 	
    PRINT 'SALESPERSON DETAILS:'
    PRINT ''
@@ -247,17 +250,17 @@ BEGIN
    --Loop until there are no more rows
    WHILE @@FETCH_STATUS = 0
       BEGIN		 
-		 PRINT 'Salesperson ID: ' + @SPID + '        Phone: ' + @Ph
-		 PRINT 'Name: ' + @FiN + ' ' + @FaN
+		 PRINT 'Salesperson ID: ' + CONVERT( VARCHAR(10), @SPID ) + '        Phone: ' + @SPh
+		 PRINT 'Name: ' + @SFname + ' ' + @SFamName
 	     PRINT ''
-		 FETCH NEXT FROM @SPCursor INTO @SPID, @FiN, @FaN, @Ph
+		 FETCH NEXT FROM @SalespersonCursor INTO @SPID, @SFname, @SFamName, @SPh
 	END
 
    --Close the cursor
-   CLOSE @SPCursor
+   CLOSE @SalespersonCursor
 
    --Delete the cursor
-   DEALLOCATE @SPCursor
+   DEALLOCATE @SalespersonCursor
 
 END
 
@@ -277,8 +280,7 @@ DROP FUNCTION KmToMiles
 
 GO
 
-CREATE FUNCTION KmToMiles
-(
+CREATE FUNCTION KmToMiles (
    @km INT
 )
 
@@ -341,7 +343,7 @@ BEGIN
       BEGIN		 
 		 PRINT 'Registration ID: ' + CONVERT(VARCHAR(10), @RID)
 		 PRINT 'Year: ' + CONVERT(VARCHAR(10), @Yr) + '       ' + 'Make: ' + @Mk + '       ' + 'Model: ' + @Md
-		 PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km, Mileage: ' + CONVERT(VARCHAR(10), dbo.KmToMiles(@km)) + ' miles'	
+		 PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km, Mileage: ' + CONVERT(VARCHAR(10), dbo.KmToMiles(@Km)) + ' miles'	
 		 PRINT 'Price: $' + CONVERT(VARCHAR(10), @Pr)
 	     PRINT ''
 		 FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr
