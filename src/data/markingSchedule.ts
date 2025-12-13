@@ -104,7 +104,7 @@ export const markingSchedule: {
     "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@\\w+\\s*;?", weight: 1 },
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "PRINT\\s+''", weight: 0.5 },
-    "REGEX::PRINT_REGISTRATION_ID": { regex: "PRINT\\s+'Registration\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\)|@\\w+)\\s*", weight: 0.25 },
+    "REGEX::PRINT_REGISTRATION_ID": { regex: "PRINT\\s+'Registration\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*", weight: 0.25 },
     "REGEX::PRINT_YEAR_MAKE_MODEL": { regex: "PRINT\\s+'Year:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*\\+\\s*'.*?Make:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Model:['\\s]*\\s*\\+\\s*@\\w+'", weight: 0.25 },
     "REGEX::PRINT_COLOUR_OWNERS_KM": { regex: "PRINT\\s+'Colour:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Owners:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*\\+\\s*'.*?Kilometres:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*\\+\\s*'km'", weight: 0.5 },
     "REGEX::PRINT_PRICE": { regex: "PRINT\\s+'Price:\\s*['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*", weight: 0.5 },
@@ -112,21 +112,21 @@ export const markingSchedule: {
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+\\w+\\s+'ALP394'", weight: 0.5 }
   },
   "Q13": {
-    "REGEX::CREATE_PROCEDURE_HEADER_Q13": { regex: "CREATE\\s+PROCEDURE\\s+\\w+\\s*\\n\\s*\\(", weight: 0 },
-    "REGEX::PARAM_SPID_VARCHAR": { regex: "@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR_FiN": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 1 },
-    "REGEX::DECLARE_VARCHAR_FaN": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 1 },
-    "REGEX::DECLARE_VARCHAR_Ph": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
-    "SELECT SalespersonID, FirstName, FamilyName, Phone": 1,
-    "FROM Salesperson": 0.5,
-    "REGEX::WHERE_SALESPERSONID_SPID": { regex: "WHERE\\s+SalespersonID\\s*=\\s*@\\w+", weight: 1 },
-    "REGEX::FETCH_NEXT_SP_DETAILS_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
-    "PRINT 'SALESPERSON DETAILS:'": 0.5,
-    "PRINT ''": 0.5,
-    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@\\w+\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\)|@\\w+)\\s*\\+\\s*'.*?Phone:['\\s]*\\s*\\+\\s*@\\w+", weight: 1 },
-    "REGEX::PRINT_SP_NAME": { regex: "PRINT\\s+'Name:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*['\\s]*\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::FETCH_NEXT_SP_DETAILS_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
-    "REGEX::EXEC_SALESPERSON_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 1 }
+    "REGEX::PARAM_SID_INT": { regex: "@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 },
+    "REGEX::DECLARE_SPID_INT": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?INT", weight: 1 },
+    "REGEX::DECLARE_SFNAME_VARCHAR": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_SFAMNAME_VARCHAR": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::DECLARE_SPH_VARCHAR": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
+    "REGEX::SELECT_SP_COLUMNS": { regex: "SELECT\\s+SalespersonID,\\s*FirstName,\\s*FamilyName,\\s*Phone", weight: 1 },
+    "REGEX::FROM_SALESPERSON": { regex: "FROM\\s+Salesperson", weight: 0.5 },
+    "REGEX::WHERE_SALESPERSONID_SID": { regex: "WHERE\\s+SalespersonID\\s*=\\s*@\\w+", weight: 1 },
+    "REGEX::FETCH_NEXT_1_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+Cursor\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "PRINT\\s+'SALESPERSON\\s+DETAILS:'", weight: 0.5 },
+    "REGEX::PRINT_EMPTY_LINE_Q13": { regex: "PRINT\\s+''", weight: 0.5 },
+    "REGEX::PRINT_SPID_PHONE_Q13": { regex: "PRINT\\s+'Salesperson\\s+ID:\\s*'\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*@SPID\\s*\\)|CAST\\(\\s*@SPID\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s*\\+\\s*'.*?Phone:\\s*'\\s*\\+\\s*@SPh", weight: 1 },
+    "REGEX::PRINT_SP_NAME_Q13": { regex: "PRINT\\s+'Name:\\s*'\\s*\\+\\s*@SFname\\s*\\+\\s*'.*?'\\s*\\+\\s*@SFamName", weight: 0.5 },
+    "REGEX::FETCH_NEXT_2_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+Cursor\\s+INTO\\s+@\\w+,\\s*@\\w+,\\s*@\\w+,\\s*@\\w+", weight: 0.5 },
+    "REGEX::EXEC_SP_DETAILS_Q13": { regex: "EXEC\\s+SalespersonDetails\\s+1", weight: 1 }
   },
   "Q14": {
     "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+KmToMiles\\s*\\(", weight: 1 },
@@ -136,6 +136,6 @@ export const markingSchedule: {
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1 },
     "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s+\\*\\s+0\\.62", weight: 2 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1 },
-    "REGEX::PRINT_MILEAGE": { regex: "Mileage:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*dbo\\.KmToMiles\\(@\\w+\\)\\s*\\)|CAST\\(\\s*@\\w+\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s+\\+\\s+' miles'", weight: 2 }
+    "REGEX::PRINT_MILEAGE": { regex: "Mileage:['\\s]*\\s*\\+\\s*(?:CONVERT\\(\\s*VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*,\\s*dbo\\.KmToMiles\\(@km\\)\\s*\\)|CAST\\(\\s*dbo\\.KmToMiles\\(@km\\)\\s+AS\\s+VARCHAR(?:\\s*\\(\\s*\\d+\\s*\\))?\\s*\\))\\s+\\+\\s+' miles'", weight: 2 }
   }
 };
