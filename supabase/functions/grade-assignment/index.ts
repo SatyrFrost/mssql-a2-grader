@@ -93,8 +93,9 @@ interface QuestionBlock {
 const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
   if (!sqlContent) return [];
 
-  const questionBlocks: QuestionBlock[] = [];
-  const lines = sqlContent.split('\n');
+  // Normalize line endings first
+  const normalizedSqlContent = sqlContent.replace(/\r\n/g, '\n');
+  const lines = normalizedSqlContent.split('\n');
   let currentQuestionId = '';
   let currentSqlBuffer: string[] = [];
   let statementCounter = 1; // For generic question IDs if --Q is missing
