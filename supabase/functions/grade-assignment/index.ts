@@ -21,6 +21,7 @@ async function createHash(message: string): Promise<string> {
 /**
  * Normalizes a SQL query string for consistent hashing.
  * Removes extra whitespace and standardizes line endings.
+ * This is primarily for SELECT statements where output consistency is key.
  */
 function normalizeSqlQuery(sql: string): string {
   // Standardize line endings to \n
@@ -67,6 +68,7 @@ async function executeMsSqlQuery(sqlQuery: string) {
       return { status: 'success' };
     } else if (trimmedQuery.startsWith('exec') || trimmedQuery.startsWith('declare') || trimmedQuery.startsWith('print')) {
       // For stored procedures, functions, etc., just return success for now
+      // Do NOT normalize PRINT statements here, as their exact string content is important for grading.
       return { status: 'success', message: 'Procedure/Function executed (mock)' };
     } else {
       return { status: 'success' }; // Default for other statements
