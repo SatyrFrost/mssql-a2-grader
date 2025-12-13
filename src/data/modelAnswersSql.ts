@@ -186,7 +186,7 @@ BEGIN
 		 PRINT 'Registration ID: ' + CONVERT(VARCHAR(10), @RID)
 		 PRINT 'Year: ' + CONVERT(VARCHAR(10), @Yr) + '       ' + 'Make: ' + @Mk + '       ' + 'Model: ' + @Md
 		 PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km'	
-		 PRINT 'Price:  + CONVERT(VARCHAR(10), @Pr)
+		 PRINT 'Price: $' + CONVERT(VARCHAR(10), @Pr)
 	     PRINT ''
 		 FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr
 	END
@@ -342,7 +342,7 @@ BEGIN
 		 PRINT 'Registration ID: ' + CONVERT(VARCHAR(10), @RID)
 		 PRINT 'Year: ' + CONVERT(VARCHAR(10), @Yr) + '       ' + 'Make: ' + @Mk + '       ' + 'Model: ' + @Md
 		 PRINT 'Colour: ' + @Col + '       ' + 'Owners: ' + CONVERT(VARCHAR(10), @Own) + '       ' + 'Kilometres: ' + CONVERT(VARCHAR(10),@Km) + 'km, Mileage: ' + CONVERT(VARCHAR(10), dbo.KmToMiles(@km)) + ' miles'	
-		 PRINT 'Price:  + CONVERT(VARCHAR(10), @Pr)
+		 PRINT 'Price: $' + CONVERT(VARCHAR(10), @Pr)
 	     PRINT ''
 		 FETCH NEXT FROM @CarCursor INTO @RID, @Yr, @Mk, @Md, @Col, @Own, @Km, @Pr
 	END
