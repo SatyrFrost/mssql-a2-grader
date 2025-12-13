@@ -83,7 +83,7 @@ export const markingSchedule: {
     "REGEX::FETCH_NEXT_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){6}", weight: 0.5 },
     "REGEX::PRINT_DETAILS_HEADER": { regex: "PRINT\\s+'CUSTOMER\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "PRINT\\s+''", weight: 0.5 },
-    "REGEX::PRINT_CID_PHONE": { regex: "PRINT\\s+'Customer\\s+ID:['\\s]*\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\)\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_CID_PHONE": { regex: "PRINT\\s+'Customer\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s*\\+\\s*'.*?'\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::PRINT_NAME": { regex: "PRINT\\s+'Customer\\s+Name:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]\\s+['\"]\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::PRINT_ADDRESS": { regex: "PRINT\\s+'Address:\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+\\s*\\+\\s*['\"]?,\\s*['\"]?\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::FETCH_NEXT_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){6}", weight: 0.5 },
@@ -101,13 +101,13 @@ export const markingSchedule: {
     "REGEX::SELECT_CAR_DETAILS": { regex: "SELECT\\s+(?:Car\\.)?RegistrationID\\s*,\\s*(?:Car\\.)?CarYear\\s*,\\s*(?:Car\\.)?Make\\s*,\\s*(?:Car\\.)?Model\\s*,\\s*(?:LU_Colour\\.)?ColourName\\s*,\\s*(?:Car\\.)?NumOwners\\s*,\\s*(?:Car\\.)?Kilometres\\s*,\\s*(?:Car\\.)?Price", weight: 0.5 },
     "REGEX::FROM_CAR_JOIN_LU_COLOUR": { regex: "FROM\\s+Car\\s+(?:INNER\\s+)?JOIN\\s+LU_Colour", weight: 0.5 },
     "ON Car.ColourID = LU_Colour.ColourID": 0.5,
-    "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@\\w+\\s*;?", weight: 1 }, // Updated for flexibility
+    "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@\\w+\\s*;?", weight: 1 },
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "PRINT\\s+''", weight: 0.5 },
-    "REGEX::PRINT_REGISTRATION_ID": { regex: "PRINT\\s+'Registration\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\(10\\),\\s*)?@\\w+(?:\\))?", weight: 0.25 },
-    "REGEX::PRINT_YEAR_MAKE_MODEL": { regex: "PRINT\\s+'Year:['\\s]*\\s*\\+\\s*CAST\\(@\\w+\\s+AS\\s+VARCHAR\\)\\s*\\+\\s*'.*?Make:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Model:['\\s]*\\s*\\+\\s*@\\w+", weight: 0.25 },
-    "REGEX::PRINT_COLOUR_OWNERS_KM": { regex: "PRINT\\s+'Colour:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Owners:['\\s]*\\s*\\+\\s*CAST\\(@\\w+\\s+AS\\s+VARCHAR\\)\\s*\\+\\s*'.*?Kilometres:['\\s]*\\s*\\+\\s*CAST\\(@\\w+\\s+AS\\s+VARCHAR\\)\\s*\\+\\s*'km'", weight: 0.5 },
-    "REGEX::PRINT_PRICE": { regex: "PRINT\\s+'Price:['\\s]*\\s*\\+\\s*CAST\\(@\\w+\\s+AS\\s+VARCHAR\\)", weight: 0.5 },
+    "REGEX::PRINT_REGISTRATION_ID": { regex: "PRINT\\s+'Registration\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\))|@\\w+)\\s*", weight: 0.25 },
+    "REGEX::PRINT_YEAR_MAKE_MODEL": { regex: "PRINT\\s+'Year:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s*\\+\\s*'.*?Make:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Model:['\\s]*\\s*\\+\\s*@\\w+", weight: 0.25 },
+    "REGEX::PRINT_COLOUR_OWNERS_KM": { regex: "PRINT\\s+'Colour:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*'.*?Owners:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s*\\+\\s*'.*?Kilometres:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s*\\+\\s*'km'", weight: 0.5 },
+    "REGEX::PRINT_PRICE": { regex: "PRINT\\s+'Price:\\s*['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s*", weight: 0.5 },
     "REGEX::FETCH_NEXT_CAR_DETAILS": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){7}", weight: 0.5 },
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+\\w+\\s+'ALP394'", weight: 0.5 }
   },
@@ -123,7 +123,7 @@ export const markingSchedule: {
     "REGEX::FETCH_NEXT_SP_DETAILS_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
     "PRINT 'SALESPERSON DETAILS:'": 0.5,
     "PRINT ''": 0.5,
-    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:['\\s]*\\s*\\+\\s*(?:CAST\\(@\\w+\\s+AS\\s+VARCHAR\\(10\\)\\)|@\\w+)\\s*\\+\\s*'.*?Phone:['\\s]*\\s*\\+\\s*@\\w+", weight: 1 },
+    "REGEX::PRINT_SPID_PHONE": { regex: "PRINT\\s+'Salesperson\\s+ID:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s*@\\w+\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\))|@\\w+)\\s*\\+\\s*'.*?Phone:['\\s]*\\s*\\+\\s*@\\w+", weight: 1 },
     "REGEX::PRINT_SP_NAME": { regex: "PRINT\\s+'Name:['\\s]*\\s*\\+\\s*@\\w+\\s*\\+\\s*['\\s]*\\s*\\+\\s*@\\w+", weight: 0.5 },
     "REGEX::FETCH_NEXT_SP_DETAILS_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
     "REGEX::EXEC_SALESPERSON_DETAILS": { regex: "EXEC\\s+\\w+\\s+1", weight: 1 }
@@ -136,6 +136,6 @@ export const markingSchedule: {
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1 },
     "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s+\\*\\s+0\\.62", weight: 2 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1 },
-    "REGEX::PRINT_MILEAGE": { regex: "Mileage:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\(10\\),\\s+dbo\\.KmToMiles\\(@\\w+\\)\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\))\\s+\\+\\s+' miles'", weight: 2 }
+    "REGEX::PRINT_MILEAGE": { regex: "Mileage:['\\s]*\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+)?\\),\\s+dbo\\.KmToMiles\\(@\\w+\\)\\)|CAST\\(@\\w+\\s+AS\\s+VARCHAR\\((?:\\d+)?\\)))\\s+\\+\\s+' miles'", weight: 2 }
   }
 };
