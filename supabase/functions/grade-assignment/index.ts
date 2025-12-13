@@ -51,29 +51,24 @@ async function executeMsSqlQuery(sqlQuery: string) {
     
     const trimmedQuery = sqlQuery.trim().toLowerCase();
     
+    // Special handling for SELECT queries to return a hash
     if (trimmedQuery.startsWith('select')) {
-      // For SELECT queries, normalize the query string before hashing for consistent comparison
       const normalizedQuery = normalizeSqlQuery(sqlQuery);
       const queryHash = await createHash(normalizedQuery);
-
-      // Return mock columns/values for display, and the hash for comparison
       return {
         columns: ['QueryHash', 'SimulatedOutput'],
         values: [[queryHash, 'Mock data based on query hash']],
-        hash: queryHash // Include hash for easier comparison
+        hash: queryHash
       };
-    } else if (trimmedQuery.startsWith('insert') || trimmedQuery.startsWith('update') || trimmedQuery.startsWith('delete')) {
-      return { status: 'success', rowsAffected: 1 };
-    } else if (trimmedQuery.startsWith('create') || trimmedQuery.startsWith('drop') || trimmedQuery.startsWith('alter')) {
-      return { status: 'success' };
-    } else if (trimmedQuery.startsWith('exec') || trimmedQuery.startsWith('declare') || trimmedQuery.startsWith('print')) {
-      // For stored procedures, functions, etc., just return success for now
-      // Do NOT normalize PRINT statements here, as their exact string content is important for grading.
-      return { status: 'success', message: 'Procedure/Function executed (mock)' };
     } else {
-      return { status: 'success' }; // Default for other statements
+      // For all other statements (DDL, DML, procedures, functions, IF statements, etc.)
+      // during initial setup and general execution, just return success.
+      return { status: 'success', message: 'Mock execution successful' };
     }
   } catch (err: any) {
+    // This catch block should ideally not be hit for non-SELECT statements
+    // unless there's a fundamental issue with Deno runtime or string processing.
+    console.error(`Error in executeMsSqlQuery for query: ${sqlQuery.substring(0, 100)}...`, err);
     return { error: `Mock query execution failed: ${err.message}` };
   }
 }
@@ -130,6 +125,7 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
     currentSqlBuffer = [];
   };
 
+  const questionBlocks: QuestionBlock[] = [];
   for (const line of lines) {
     const trimmedLine = line.trim();
     // FIX: Update regex to match both --Q# and --Question#
@@ -169,9 +165,11 @@ serve(async (req) => {
       
       for (const block of initialSetupBlocks) {
         for (const stmtPart of block.sqlParts) {
+          console.log(`Executing initial setup SQL part: ${stmtPart.sql.substring(0, 100)}...`); // Log first 100 chars
           const setupResult = await executeMsSqlQuery(stmtPart.sql);
+          console.log('Initial setup result:', setupResult); // Log the full result
           if (setupResult && (setupResult as any).error) {
-            console.error('Initial setup error:', setupResult);
+            console.error('Initial setup error details:', setupResult); // More specific error log
             return new Response(
               JSON.stringify({ 
                 error: 'Failed to set up initial database schema.',
