@@ -59,7 +59,7 @@ export const markingSchedule: {
   "Q9": {
     "SELECT": 0.5,
     "FROM": 0.5,
-    "LEFT OUTER JOIN": 1,
+    "REGEX::LEFT_OUTER_JOIN": { regex: "LEFT\\s+(?:OUTER\\s+)?JOIN", weight: 1 }, // Flexible for LEFT JOIN or LEFT OUTER JOIN, and multi-line
     "AND 1": 1,
     "AND 2": 1
   },
@@ -76,7 +76,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_VARCHAR_A1": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR_A2": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
     "REGEX::DECLARE_VARCHAR_A3": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
-    "REGEX::DECLARE_VARCHAR_PH": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 }, // Flexible for any VARCHAR length
+    "REGEX::DECLARE_VARCHAR_PH": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:\\d+)\\)", weight: 0.5 },
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+(?=.*CustomerID)(?=.*FirstName)(?=.*FamilyName)(?=.*Phone)(?=.*Address1)(?=.*Address2)(?=.*Address3).*FROM\\s+Customer", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s*=\\s*@\\w+", weight: 1.0 },
@@ -99,7 +99,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_INT_3": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?INT", weight: 0.5 },
     "REGEX::DECLARE_MONEY": { regex: "DECLARE\\s+@\\w+\\s+(?:AS\\s+)?MONEY", weight: 0.5 },
     "REGEX::SELECT_CAR_DETAILS": { regex: "SELECT\\s+(?:Car\\.)?RegistrationID\\s*,\\s*(?:Car\\.)?CarYear\\s*,\\s*(?:Car\\.)?Make\\s*,\\s*(?:Car\\.)?Model\\s*,\\s*(?:LU_Colour\\.)?ColourName\\s*,\\s*(?:Car\\.)?NumOwners\\s*,\\s*(?:Car\\.)?Kilometres\\s*,\\s*(?:Car\\.)?Price", weight: 0.5 },
-    "FROM Car JOIN LU_Colour": 0.5,
+    "REGEX::FROM_CAR_JOIN_LU_COLOUR": { regex: "FROM\\s+Car\\s+(?:INNER\\s+)?JOIN\\s+LU_Colour", weight: 0.5 }, // Flexible for INNER JOIN and multi-line
     "ON Car.ColourID = LU_Colour.ColourID": 0.5,
     "REGEX::WHERE_REGISTRATION_ID": { regex: "WHERE\\s+RegistrationID\\s*=\\s*@\\w+", weight: 1 },
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.5 },
