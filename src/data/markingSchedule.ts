@@ -86,7 +86,7 @@ export const markingSchedule: {
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'(?:Customer\\s+ID|CustomerID):\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\(10\\),\\s*)?@\\w+\\)?)\\s*\\+\\s*'(?:\\s{1,8})?Phone:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.0 },
     "REGEX::PRINT_NAME": { regex: "(?:PRINT|print)\\s+'(?:Customer\\s+Name|CustomerName):\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'(?:\\s*)?'?\\s*\\+?\\s*@\\w+(?:;)?", weight: 0.5 },
-    "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'(?:Address|CUSTOMER\\s+ADDRESS):\\s*'(?:\\s*\\+\\s*@\\w+){3}(?:;)?", weight: 0.5 },
+    "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'(?:Address|CUSTOMER\\s+ADDRESS):\\s*'(?:\\s*\\+\\s*@\\w+)(?:\\s*\\+\\s*',\\s*'\\s*\\+\\s*@\\w+){2}(?:;)?", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+CustomerDetails\\s+(?:\\d+|'\\d+')", weight: 0.5 }
   },
   "Q12": {
@@ -128,7 +128,7 @@ export const markingSchedule: {
     "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 1.0 },
     "REGEX::AS_KEYWORD": { regex: "AS", weight: 1.0 },
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1.0 },
-    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s*\\*\\s*0\\.62", weight: 1.2 }, // Adjusted from 1.5 to 1.2
+    "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s*\\*\\s*0\\.62", weight: 1.2 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1.0 },
 
     "REGEX::PRINT_COLOUR_OWNERS_KM_MILEAGE_Q14": { regex: "(?:PRINT|print)\\s+'Colour:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+\\s*'[^']+'\\s*\\+\\s*'Owners:\\s*'(?:\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\))\\s*\\+\\s*'[^']+'\\s*\\+\\s*'Kilometres:\\s*'(?:\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\))\\s*\\+\\s*'km,\\s*Mileage:\\s*'(?:\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*dbo\\.KmToMiles\\(@\\w+\\)\\))\\s*\\+\\s*'\\s*miles'", weight: 0.5 },
