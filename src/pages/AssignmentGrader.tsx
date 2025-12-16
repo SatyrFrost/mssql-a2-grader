@@ -162,9 +162,13 @@ const AssignmentGrader = () => {
           } else {
             feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
           }
-        } else if (studentSqlLower.includes(ruleName.toLowerCase())) {
+        } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) { // Only award if weight > 0
           score += ruleDefinition;
           feedback.push(`+${ruleDefinition} for '${ruleName}'.`);
+        } else if (ruleDefinition === 0) {
+          // If weight is 0, it's an optional check, no feedback for missing
+          // We still add to maxScore if it's a positive weight, but here it's 0.
+          // So, no score, no feedback for 0-weight rules.
         } else {
           feedback.push(`-0 for missing '${ruleName}'.`);
         }
@@ -172,8 +176,19 @@ const AssignmentGrader = () => {
         // This is a REGEX rule
         maxScore += ruleDefinition.weight; // Add points to maxScore
         try {
-          const regex = new RegExp(ruleDefinition.regex, 'is'); // 's' flag for dotall, 'i' for case-insensitive
-          if (regex.test(studentSql)) { // Test against the full studentSql
+          const regex = new RegExp(ruleDefinition.regex, 'gis'); // 's' flag for dotall, 'i' for case-insensitive
+
+          // Special handling for FETCH_NEXT rules to count occurrences
+          if (ruleName.includes('FETCH_NEXT')) {
+            const matches = studentSql.match(regex);
+            const expectedCount = parseInt(ruleName.split('_').pop() || '1'); // Extract 1 or 2 from FETCH_NEXT_1/2
+            if (matches && matches.length >= expectedCount) {
+              score += ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\` (${matches.length} found, ${expectedCount} expected).`);
+            } else {
+              feedback.push(`-0 for not matching pattern: \`${ruleName}\` (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
+            }
+          } else if (regex.test(studentSql)) { // General regex check
             score += ruleDefinition.weight;
             feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\`.`);
           } else {
