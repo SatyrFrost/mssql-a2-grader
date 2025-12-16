@@ -101,8 +101,8 @@ export const markingSchedule: {
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'VEHICLE\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_REGISTRATION_ID": { regex: "(?:PRINT|print)\\s+'Registration\\s+ID:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:;)?", weight: 1.25 },
-    "REGEX::PRINT_YEAR_MAKE_MODEL_Q12": { regex: "(?:PRINT|print)\\s+'Year:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)\\s*\\+?\\s*'.*?Make:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'.*?Model:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.25 },
-    "REGEX::PRINT_COLOUR_OWNERS_KM_Q12": { regex: "(?:PRINT|print)\\s+'Colour:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'.*?Owners:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)\\s*\\+?\\s*'.*?Kilometres:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:'km')?(?:;)?", weight: 1.0 },
+    "REGEX::PRINT_YEAR_MAKE_MODEL_Q12": { regex: "(?:PRINT|print)\\s+'Year:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:\\s*\\+\\s*'(?:\\s*)?Make:\\s*'(?:\\s*\\+\\s*@\\w+))?(?:\\s*\\+\\s*'(?:\\s*)?Model:\\s*'(?:\\s*\\+\\s*@\\w+))?(?:;)?", weight: 1.25 },
+    "REGEX::PRINT_COLOUR_OWNERS_KM_Q12": { regex: "(?:PRINT|print)\\s+'Colour:\\s*'(?:\\s*\\+\\s*@\\w+)(?:\\s*\\+\\s*'(?:\\s*)?Owners:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?))?(?:\\s*\\+\\s*'(?:\\s*)?Kilometres:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:'km')?)?(?:;)?", weight: 1.0 },
     "REGEX::PRINT_PRICE": { regex: "(?:PRINT|print)\\s+'Price:\\s*\\$?'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:;)?", weight: 0.5 },
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+CarDetails\\s+'ALP394'", weight: 0.5 }
   },
