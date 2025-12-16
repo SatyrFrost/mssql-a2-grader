@@ -81,13 +81,12 @@ export const markingSchedule: {
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\bPhone\\b)(?=[^;]*\\bFirstName\\b)(?=[^;]*\\bFamilyName\\b)(?=[^;]*\\bAddress1\\b)(?=[^;]*\\bAddress2\\b)(?=[^;]*\\bAddress3).*?FROM", weight: 1.0 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+(?:\\w+\\.)?CustomerID\\s*=\\s*@\\w+", weight: 0.5 },
-    "REGEX::FETCH_NEXT_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){6}", weight: 0.5 },
-    "REGEX::PRINT_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'(?:CUSTOMER\\s+DETAILS|Customer\\s+Details)(?:\\s*:)?'", weight: 0.5 },
+    "REGEX::FETCH_NEXT_COUNT_Q11": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){6}", weight: 1.0 }, // Combined weight for both fetches
+    "REGEX::PRINT_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'(?:CUSTOMER\\s+DETAILS|Customer\\s+Details)(?:\\s*:)?'", weight: 0.0 }, // Reverted to 0.0
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'(?:Customer\\s+ID|CustomerID):\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\(10\\),\\s*)?@\\w+\\)?)\\s*\\+\\s*'(?:\\s{1,8})?Phone:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.0 },
     "REGEX::PRINT_NAME": { regex: "(?:PRINT|print)\\s+'(?:Customer\\s+Name|CustomerName):\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'(?:\\s*)?'?\\s*\\+?\\s*@\\w+(?:;)?", weight: 0.5 },
     "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'(?:Address|CUSTOMER\\s+ADDRESS):\\s*'(?:\\s*\\+\\s*@\\w+){3}(?:;)?", weight: 0.5 },
-    "REGEX::FETCH_NEXT_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){6}", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+CustomerDetails\\s+(?:\\d+|'\\d+')", weight: 0.5 }
   },
   "Q12": {
@@ -98,14 +97,13 @@ export const markingSchedule: {
     "REGEX::CURSOR_FROM_CLAUSE": { regex: "FROM\\s+Car(?:\\s*,\\s*LU_Colour)?", weight: 0.25 },
     "REGEX::COLOUR_RETRIEVAL_LOGIC_Q12": { regex: "(?:(?:INNER\\s+)?JOIN\\s+LU_Colour\\s+ON\\s+(?:\\w+\\.)?Car\\.ColourID\\s*=\\s*(?:\\w+\\.)?LU_Colour\\.ColourID|WHERE\\s+(?:\\w+\\.)?Car\\.ColourID\\s*=\\s*(?:\\w+\\.)?LU_Colour\\.ColourID)", weight: 0.5 },
     "REGEX::CURSOR_WHERE_CLAUSE": { regex: "(?:AND|WHERE)\\s+(?:\\w+\\.)?RegistrationID\\s*=\\s*@\\w+", weight: 0.25 },
-    "REGEX::FETCH_NEXT_1_Q12": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+CURSOR\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){7}", weight: 0.5 },
+    "REGEX::FETCH_NEXT_COUNT_Q12": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+CURSOR\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){7}", weight: 1.0 }, // Combined weight for both fetches
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'VEHICLE\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_2": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_REGISTRATION_ID": { regex: "(?:PRINT|print)\\s+'Registration\\s+ID:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:;)?", weight: 1.25 },
     "REGEX::PRINT_YEAR_MAKE_MODEL_Q12": { regex: "(?:PRINT|print)\\s+'Year:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)\\s*\\+?\\s*'.*?Make:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'.*?Model:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.25 },
     "REGEX::PRINT_COLOUR_OWNERS_KM_Q12": { regex: "(?:PRINT|print)\\s+'Colour:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'.*?Owners:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)\\s*\\+?\\s*'.*?Kilometres:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:'km')?(?:;)?", weight: 1.0 },
     "REGEX::PRINT_PRICE": { regex: "(?:PRINT|print)\\s+'Price:\\s*\\$?'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:;)?", weight: 0.5 },
-    "REGEX::FETCH_NEXT_2_Q12": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+CURSOR\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){7}", weight: 0.5 },
     "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+CarDetails\\s+'ALP394'", weight: 0.5 }
   },
   "Q13": {
@@ -117,12 +115,11 @@ export const markingSchedule: {
     "REGEX::SELECT_SP_COLUMNS": { regex: "SELECT\\s+(?:\\w+\\.)?SalesPersonID,\\s*(?:\\w+\\.)?FirstName,\\s*(?:\\w+\\.)?FamilyName,\\s*(?:\\w+\\.)?Phone", weight: 1.5 },
     "REGEX::FROM_SALESPERSON": { regex: "FROM\\s+Salesperson(?:\\s+\\w+)?", weight: 0.5 },
     "REGEX::WHERE_SALESPERSONID_SPID": { regex: "WHERE\\s+(?:\\w+\\.)?SalespersonID\\s*=\\s*@\\w+", weight: 1.0 },
-    "REGEX::FETCH_NEXT_1_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
+    "REGEX::FETCH_NEXT_COUNT_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 1.0 }, // Combined weight for both fetches
     "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'SALESPERSON\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_Q13": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s+'Salesperson\\s+ID:\\s*'(?:\\s*\\+\\s*@\\w+)?\\s*\\+\\s*'\\s*Phone:\\s*'(?:\\s*\\+\\s*@\\w+)?", weight: 1.0 },
     "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s+'Name:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+\\s*'\\s*'\\s*\\+\\s*@\\w+", weight: 0.5 },
-    "REGEX::FETCH_NEXT_2_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 0.5 },
     "REGEX::EXEC_SP_DETAILS_Q13": { regex: "EXEC\\s+(?:SalespersonDetails|GetSalespersonDetails)\\s+(?:@SalespersonID\\s*=\\s*)?1", weight: 1.0 }
   },
   "Q14": {
@@ -141,7 +138,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_VARS_Q14": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?INT(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:50|100)\\)(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:50|100)\\)(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:50|100)\\)(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?INT(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?INT(?:;)?\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?MONEY(?:;)?(?:\\s*(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?FLOAT(?:;))?", weight: 0.5 },
     "REGEX::SELECT_CAR_DETAILS_Q14": { regex: "SELECT\\s+(?:\\w+\\.)?RegistrationID,\\s*(?:\\w+\\.)?CarYear,\\s*(?:\\w+\\.)?Make,\\s*(?:\\w+\\.)?Model,\\s*(?:\\w+\\.)?(?:ColourID|ColourName),\\s*(?:\\w+\\.)?NumOwners,\\s*(?:\\w+\\.)?Kilometres,\\s*(?:\\w+\\.)?Price", weight: 0.25 },
     "REGEX::WHERE_RID_Q14": { regex: "WHERE\\s+(?:\\w+\\.)?RegistrationID\\s*=\\s*@\\w+", weight: 0.25 },
-    "REGEX::FETCH_NEXT_Q14": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){7}", weight: 0.25 },
+    "REGEX::FETCH_NEXT_COUNT_Q14": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){7}", weight: 0.5 }, // Combined weight for both fetches
     "REGEX::PRINT_VEHICLE_DETAILS_HEADER_Q14": { regex: "(?:PRINT|print)\\s+'VEHICLE\\s+DETAILS(?:\\s*:)?'", weight: 0.0 },
     "REGEX::PRINT_EMPTY_LINE_Q14": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.0 },
     "REGEX::PRINT_REGISTRATION_ID_Q14": { regex: "(?:PRINT|print)\\s+'Registration\\s+ID:\\s*'(?:\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@\\w+\\))?", weight: 0.0 },

@@ -166,22 +166,15 @@ const AssignmentGrader = () => {
         try {
           const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
-          if (ruleName.includes('FETCH_NEXT')) {
+          if (ruleName.includes('FETCH_NEXT_COUNT')) {
             const matches = studentSql.match(regex);
-            let expectedCount = 0;
-            if (ruleName.includes('FETCH_NEXT_1')) { // Covers Q11, Q12, Q13
-                expectedCount = 1;
-            } else if (ruleName.includes('FETCH_NEXT_2')) { // Covers Q11, Q12, Q13
-                expectedCount = 2;
-            } else if (ruleName.includes('FETCH_NEXT_Q14')) { // Specific for Q14
-                expectedCount = 1;
-            }
+            const expectedCount = 2; // All these questions (Q11-Q14) expect two FETCH NEXT statements
 
             if (matches && matches.length >= expectedCount) {
               score += ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\` (${matches.length} found, ${expectedCount} expected).`);
+              feedback.push(`+${ruleDefinition.weight} for including ${expectedCount} 'FETCH NEXT' statements.`);
             } else {
-              feedback.push(`-0 for not matching pattern: \`${ruleName}\` (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
+              feedback.push(`-0 for missing or insufficient 'FETCH NEXT' statements (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
             }
           } else if (regex.test(studentSql)) { 
             score += ruleDefinition.weight;
@@ -208,14 +201,10 @@ const AssignmentGrader = () => {
           const deduction = 0.5; 
           score = Math.max(0, score - deduction); 
           feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
-        } else {
-          // Optional: Add positive feedback if they match, if it's a complex rule
-          // feedback.push(`+0.0 for correct parameter usage: Declared '@${declaredParamName}' and used '@${usedParamName}' in WHERE clause.`);
         }
       } else {
-        // This feedback helps debug if the regexes themselves are failing
-        if (!declaredParamName) feedback.push(`-0 for Q12 parameter mismatch check: Could not find declared parameter name.`);
-        if (!usedParamName) feedback.push(`-0 for Q12 parameter mismatch check: Could not find used parameter name in WHERE clause.`);
+        // These debug messages are helpful for understanding why the check might fail
+        // feedback.push(`Debug: Q12 param check - Declared: ${declaredParamName}, Used: ${usedParamName}`);
       }
     }
 
