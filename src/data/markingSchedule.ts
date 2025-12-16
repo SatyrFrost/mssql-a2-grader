@@ -78,15 +78,15 @@ export const markingSchedule: {
     "REGEX::DECLARE_CA2_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:100|30|20)\\)", weight: 0.5 },
     "REGEX::DECLARE_CA3_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:100|30|20)\\)", weight: 0.5 },
     "REGEX::DECLARE_Ph_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:20|30|10)\\)", weight: 0.5 },
-    "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\bPhone\\b)(?=[^;]*\\bFirstName\\b)(?=[^;]*\\bFamilyName\\b)(?=[^;]*\\bAddress1\\b)(?=[^;]*\\bAddress2\\b)(?=[^;]*\\bAddress3).*?FROM", weight: 0.5 }, // Reverted to 0.5
+    "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\bPhone\\b)(?=[^;]*\\bFirstName\\b)(?=[^;]*\\bFamilyName\\b)(?=[^;]*\\bAddress1\\b)(?=[^;]*\\bAddress2\\b)(?=[^;]*\\bAddress3).*?FROM", weight: 1.0 }, // Corrected weight to 1.0
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s*=\\s*@\\w+", weight: 0.5 },
     "REGEX::FETCH_NEXT_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){5}", weight: 0.5 },
     "REGEX::PRINT_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'CUSTOMER\\s+DETAILS(?:\\s*:)?'", weight: 0.0 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
-    "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'Customer\\s+ID:\\s*'(?:\\s*\\+\\s*(?:CONVERT|CAST)\\s*\\(\\s*VARCHAR\\(10\\),\\s*@\\w+\\))\\s*\\+\\s*'(?:\\s{1,8})?Phone:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.0 }, // Reverted to 1.0, added (?:;)?
-    "REGEX::PRINT_NAME": { regex: "(?:PRINT|print)\\s+'Customer\\s+Name:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+\\s*'\\s*'\\s*\\+\\s*@\\w+(?:;)?", weight: 0.5 }, // Added (?:;)?
-    "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'Address:\\s*'(?:\\s*\\+\\s*@\\w+\\s*\\+\\s*',\\s*'){2}\\s*\\+\\s*@\\w+(?:;)?", weight: 0.5 }, // Added (?:;)?
+    "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'Customer\\s+ID:\\s*'(?:\\s*\\+\\s*(?:CONVERT|CAST)\\s*\\(\\s*VARCHAR\\(10\\),\\s*@\\w+\\))\\s*\\+\\s*'(?:\\s{1,8})?Phone:\\s*'(?:\\s*\\+\\s*@\\w+)(?:;)?", weight: 1.0 },
+    "REGEX::PRINT_NAME": { regex: "(?:PRINT|print)\\s+'Customer\\s+Name:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+\\s*'\\s*'\\s*\\+\\s*@\\w+(?:;)?", weight: 0.5 },
+    "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'Address:\\s*'(?:\\s*\\+\\s*@\\w+\\s*\\+\\s*',\\s*'){2}\\s*\\+\\s*@\\w+(?:;)?", weight: 0.5 },
     "REGEX::FETCH_NEXT_2": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){5}", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+CustomerDetails\\s+1", weight: 0.5 }
   },
