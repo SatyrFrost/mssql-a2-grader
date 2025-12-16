@@ -73,10 +73,7 @@ const AssignmentGrader = () => {
     let maxScore = 0;
     const feedback: string[] = [];
 
-    // Normalize the rawQuestionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1", "--Question11" -> "Q11")
-    // This is now handled by the edge function, so rawQuestionId should already be 'Q1', 'Q2', etc.
     const questionId = rawQuestionId; 
-
     const questionMarking = markingSchedule[questionId];
 
     if (!questionMarking) {
@@ -87,19 +84,26 @@ const AssignmentGrader = () => {
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
+    // Extract declared parameter name for Q12
+    let declaredParamName: string | null = null;
+    if (questionId === 'Q12') {
+      const paramMatch = studentSql.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
+      if (paramMatch && paramMatch[1]) {
+        declaredParamName = paramMatch[1];
+      }
+    }
+
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
       if (typeof ruleDefinition === 'number') {
-        // This is a simple keyword match or special case like [labels]
-        maxScore += ruleDefinition; // Add points to maxScore
+        maxScore += ruleDefinition; 
 
         if (ruleName === '[labels]') {
-          // Special handling for Q5 aliases: check for presence of 'AS' keywords
           if (questionId === 'Q5') {
             const selectClauseMatch = studentSql.match(/SELECT\s+(.*?)\s+FROM/is);
             if (selectClauseMatch && selectClauseMatch[1]) {
               const selectContent = selectClauseMatch[1];
               const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
-              if (asCount >= 5) { // Expecting 5 aliases for Q5 aggregate functions
+              if (asCount >= 5) { 
                 score += ruleDefinition;
                 feedback.push(`+${ruleDefinition} for correctly including aliases for aggregate functions.`);
               } else {
@@ -109,10 +113,6 @@ const AssignmentGrader = () => {
               feedback.push(`-0 for labels (could not parse SELECT clause for alias check).`);
             }
           } else {
-            // For other questions, if [labels] is used, it might still imply hash comparison
-            // but for now, we'll treat it as a general output correctness check.
-            // Given the user's feedback, we'll make this lenient.
-            // For now, if it's not Q5, we'll just give the point if the query executed without error.
             const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
             if (!studentHasError) {
                score += ruleDefinition;
@@ -121,9 +121,9 @@ const AssignmentGrader = () => {
                feedback.push(`-0 for labels (query execution failed).`);
             }
           }
-        } else if (ruleName === 'JOIN' && questionId === 'Q4') { // Specific check for Q4's JOIN rule
+        } else if (ruleName === 'JOIN' && questionId === 'Q4') { 
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
-          if (joinCount >= 1) { // Check for at least one JOIN
+          if (joinCount >= 1) { 
             score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for including a 'JOIN' clause.`);
           } else {
@@ -162,33 +162,33 @@ const AssignmentGrader = () => {
           } else {
             feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
           }
-        } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) { // Only award if weight > 0
+        } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) { 
           score += ruleDefinition;
           feedback.push(`+${ruleDefinition} for '${ruleName}'.`);
         } else if (ruleDefinition === 0) {
-          // If weight is 0, it's an optional check, no feedback for missing
-          // We still add to maxScore if it's a positive weight, but here it's 0.
-          // So, no score, no feedback for 0-weight rules.
+          // No score, no feedback for 0-weight rules.
         } else {
           feedback.push(`-0 for missing '${ruleName}'.`);
         }
       } else if (typeof ruleDefinition === 'object' && ruleDefinition !== null && 'regex' in ruleDefinition && 'weight' in ruleDefinition) {
-        // This is a REGEX rule
-        maxScore += ruleDefinition.weight; // Add points to maxScore
+        maxScore += ruleDefinition.weight; 
         try {
-          const regex = new RegExp(ruleDefinition.regex, 'gis'); // 's' flag for dotall, 'i' for case-insensitive
+          const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
-          // Special handling for FETCH_NEXT rules to count occurrences
           if (ruleName.includes('FETCH_NEXT')) {
             const matches = studentSql.match(regex);
-            const expectedCount = parseInt(ruleName.split('_').pop() || '1'); // Extract 1 or 2 from FETCH_NEXT_1/2
+            let expectedCount = 0;
+            if (ruleName.includes('_1_Q12') || ruleName.includes('_1_Q13') || ruleName.includes('_1')) expectedCount = 1;
+            if (ruleName.includes('_2_Q12') || ruleName.includes('_2_Q13') || ruleName.includes('_2')) expectedCount = 2;
+            if (ruleName.includes('_Q14')) expectedCount = 1; // Q14 has only one FETCH_NEXT_Q14 rule
+
             if (matches && matches.length >= expectedCount) {
               score += ruleDefinition.weight;
               feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\` (${matches.length} found, ${expectedCount} expected).`);
             } else {
               feedback.push(`-0 for not matching pattern: \`${ruleName}\` (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
             }
-          } else if (regex.test(studentSql)) { // General regex check
+          } else if (regex.test(studentSql)) { 
             score += ruleDefinition.weight;
             feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\`.`);
           } else {
@@ -196,6 +196,19 @@ const AssignmentGrader = () => {
           }
         } catch (e: any) {
           feedback.push(`Error in regex pattern '${ruleDefinition.regex}' for rule '${ruleName}': ${e.message}`);
+        }
+      }
+    }
+
+    // Specific check for Q12 parameter name mismatch
+    if (questionId === 'Q12' && declaredParamName) {
+      const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\s+(?:Car\.)?RegistrationID\s*=\s*@(\w+)/i);
+      if (whereClauseMatch && whereClauseMatch[1]) {
+        const usedParamName = whereClauseMatch[1];
+        if (usedParamName !== declaredParamName) {
+          const deduction = 0.5; 
+          score = Math.max(0, score - deduction); 
+          feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
         }
       }
     }
