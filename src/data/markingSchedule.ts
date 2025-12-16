@@ -78,7 +78,7 @@ export const markingSchedule: {
     "REGEX::DECLARE_CA2_VARCHAR": { regex: "DECLARE\\s+@CA2\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_CA3_VARCHAR": { regex: "DECLARE\\s+@CA3\\s+AS\\s+VARCHAR\\(100\\)", weight: 0.5 },
     "REGEX::DECLARE_Ph_VARCHAR": { regex: "DECLARE\\s+@Ph\\s+AS\\s+VARCHAR\\(20\\)", weight: 0.5 },
-    "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+CustomerID,\\s*FirstName,\\s*FamilyName,\\s*Phone,\\s*Address1,\\s*Address2,\\s*Address3", weight: 0.5 }, // Changed from 1.0 to 0.5
+    "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s+CustomerID,\\s*FirstName,\\s*FamilyName,\\s*Phone,\\s*Address1,\\s*Address2,\\s*Address3", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+CustomerID\\s*=\\s*@CID", weight: 1.0 },
     "REGEX::FETCH_NEXT_1": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@CustomerCursor\\s+INTO\\s+@CID,\\s*@CFiN,\\s*@CFaN,\\s*@Ph,\\s*@CA1,\\s*@CA2,\\s*@CA3", weight: 0.5 },
@@ -129,28 +129,30 @@ export const markingSchedule: {
     "REGEX::EXEC_SP_DETAILS_Q13": { regex: "EXEC\\s+SalespersonDetails\\s+1", weight: 1.0 }
   },
   "Q14": { // Total 10.0 points
-    // KmToMiles Function (5.0 points)
-    "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+KmToMiles", weight: 0.5 },
-    "REGEX::FUNCTION_PARAM_INT": { regex: "@km\\s+INT", weight: 0.5 },
-    "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 0.5 },
-    "REGEX::AS_KEYWORD": { regex: "AS", weight: 0.5 },
-    "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 0.5 },
+    // KmToMiles Function (8.0 points)
+    "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+KmToMiles", weight: 1.0 },
+    "REGEX::FUNCTION_PARAM_INT": { regex: "@km\\s+INT", weight: 1.0 },
+    "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 1.0 },
+    "REGEX::AS_KEYWORD": { regex: "AS", weight: 1.0 },
+    "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1.0 },
     "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s*\\*\\s*0\\.62", weight: 2.0 },
-    "REGEX::END_KEYWORD": { regex: "END", weight: 0.5 },
+    "REGEX::END_KEYWORD": { regex: "END", weight: 1.0 },
 
-    // CarDetails2 Procedure (5.0 points)
-    "REGEX::PROCEDURE_HEADER_Q14": { regex: "CREATE\\s+PROCEDURE\\s+CarDetails2", weight: 0.25 },
-    "REGEX::PARAM_RID_Q14": { regex: "@RID\\s+VARCHAR\\(20\\)", weight: 0.25 },
-    "REGEX::DECLARE_VARS_Q14": { regex: "DECLARE\\s+@Yr\\s+AS\\s+INT\\s+DECLARE\\s+@Mk\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Md\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Col\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Own\\s+AS\\s+INT\\s+DECLARE\\s+@Km\\s+AS\\s+INT\\s+DECLARE\\s+@Pr\\s+AS\\s+MONEY", weight: 0.25 }, // Grouped declarations
-    "REGEX::SELECT_CAR_DETAILS_Q14": { regex: "SELECT\\s+RegistrationID,\\s*CarYear,\\s*Make,\\s*Model,\\s*ColourName,\\s*NumOwners,\\s*Kilometres,\\s*Price", weight: 0.25 },
-    "REGEX::WHERE_RID_Q14": { regex: "WHERE\\s+RegistrationID\\s*=\\s*@RID", weight: 0.25 },
-    "REGEX::FETCH_NEXT_Q14": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@CarCursor\\s+INTO\\s+@RID,\\s*@Yr,\\s*@Mk,\\s*@Md,\\s*@Col,\\s*@Own,\\s*@Km,\\s*@Pr", weight: 0.25 },
-    "REGEX::PRINT_VEHICLE_DETAILS_HEADER_Q14": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.25 },
-    "REGEX::PRINT_EMPTY_LINE_Q14": { regex: "PRINT\\s+''", weight: 0.25 },
-    "REGEX::PRINT_REGISTRATION_ID_Q14": { regex: "PRINT\\s+'Registration\\s+ID:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@RID\\)", weight: 0.25 },
-    "REGEX::PRINT_YEAR_MAKE_MODEL_Q14": { regex: "PRINT\\s+'Year:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Yr\\)\\s*\\+\\s*'\\s{7}Make:\\s*'\\s*\\+\\s*@Mk\\s*\\+\\s*'\\s{7}Model:\\s*'\\s*\\+\\s*@Md", weight: 0.25 },
+    // CarDetails2 Procedure (2.0 points for the specific line)
     "REGEX::PRINT_COLOUR_OWNERS_KM_MILEAGE_Q14": { regex: "PRINT\\s+'Colour:\\s*'\\s*\\+\\s*@Col\\s*\\+\\s*'\\s{7}Owners:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Own\\)\\s*\\+\\s*'\\s{7}Kilometres:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Km\\)\\s*\\+\\s*'km,\\s*Mileage:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*dbo\\.KmToMiles\\(@Km\\)\\)\\s*\\+\\s*'\\s*miles'", weight: 2.0 },
-    "REGEX::PRINT_PRICE_Q14": { regex: "PRINT\\s+'Price:\\s*\\$'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Pr\\)", weight: 0.25 },
-    "REGEX::EXEC_CAR_DETAILS2_Q14": { regex: "EXEC\\s+CarDetails2\\s+'ALP394'", weight: 0.25 }
+
+    // Other CarDetails2 Procedure elements (0.0 points)
+    "REGEX::PROCEDURE_HEADER_Q14": { regex: "CREATE\\s+PROCEDURE\\s+CarDetails2", weight: 0.0 },
+    "REGEX::PARAM_RID_Q14": { regex: "@RID\\s+VARCHAR\\(20\\)", weight: 0.0 },
+    "REGEX::DECLARE_VARS_Q14": { regex: "DECLARE\\s+@Yr\\s+AS\\s+INT\\s+DECLARE\\s+@Mk\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Md\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Col\\s+AS\\s+VARCHAR\\(100\\)\\s+DECLARE\\s+@Own\\s+AS\\s+INT\\s+DECLARE\\s+@Km\\s+AS\\s+INT\\s+DECLARE\\s+@Pr\\s+AS\\s+MONEY", weight: 0.0 },
+    "REGEX::SELECT_CAR_DETAILS_Q14": { regex: "SELECT\\s+RegistrationID,\\s*CarYear,\\s*Make,\\s*Model,\\s*ColourName,\\s*NumOwners,\\s*Kilometres,\\s*Price", weight: 0.0 },
+    "REGEX::WHERE_RID_Q14": { regex: "WHERE\\s+RegistrationID\\s*=\\s*@RID", weight: 0.0 },
+    "REGEX::FETCH_NEXT_Q14": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@CarCursor\\s+INTO\\s+@RID,\\s*@Yr,\\s*@Mk,\\s*@Md,\\s*@Col,\\s*@Own,\\s*@Km,\\s*@Pr", weight: 0.0 },
+    "REGEX::PRINT_VEHICLE_DETAILS_HEADER_Q14": { regex: "PRINT\\s+'VEHICLE\\s+DETAILS:'", weight: 0.0 },
+    "REGEX::PRINT_EMPTY_LINE_Q14": { regex: "PRINT\\s+''", weight: 0.0 },
+    "REGEX::PRINT_REGISTRATION_ID_Q14": { regex: "PRINT\\s+'Registration\\s+ID:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@RID\\)", weight: 0.0 },
+    "REGEX::PRINT_YEAR_MAKE_MODEL_Q14": { regex: "PRINT\\s+'Year:\\s*'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Yr\\)\\s*\\+\\s*'\\s{7}Make:\\s*'\\s*\\+\\s*@Mk\\s*\\+\\s*'\\s{7}Model:\\s*'\\s*\\+\\s*@Md", weight: 0.0 },
+    "REGEX::PRINT_PRICE_Q14": { regex: "PRINT\\s+'Price:\\s*\\$'\\s*\\+\\s*CONVERT\\(VARCHAR\\(10\\),\\s*@Pr\\)", weight: 0.0 },
+    "REGEX::EXEC_CAR_DETAILS2_Q14": { regex: "EXEC\\s+CarDetails2\\s+'ALP394'", weight: 0.0 }
   }
 };
