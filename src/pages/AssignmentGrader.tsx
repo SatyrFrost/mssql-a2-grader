@@ -74,11 +74,8 @@ const AssignmentGrader = () => {
     const feedback: string[] = [];
 
     // Normalize the rawQuestionId to match the markingSchedule keys (e.g., "--Q1" -> "Q1", "--Question11" -> "Q11")
-    const questionIdMatch = rawQuestionId.match(/--(?:Q|Question)(\d+)/i); // Match --Q# or --Question# and capture the number
-    let questionId = rawQuestionId;
-    if (questionIdMatch && questionIdMatch[1]) {
-      questionId = `Q${questionIdMatch[1]}`; // Reconstruct as "Q1", "Q11", etc.
-    }
+    // This is now handled by the edge function, so rawQuestionId should already be 'Q1', 'Q2', etc.
+    const questionId = rawQuestionId; 
 
     const questionMarking = markingSchedule[questionId];
 
@@ -201,7 +198,8 @@ const AssignmentGrader = () => {
         setStudentSql(fullContent); // Store full content for display
 
         // Find the start of the actual questions (e.g., --Q1 or --Question1)
-        const questionStartRegex = /(^--Q\d+|^--Question\d+)/im; // Case-insensitive, multiline
+        // Made regex more robust to handle potential whitespace variations
+        const questionStartRegex = /(^--\s*(?:Q|Question)\s*\d+)/im; 
         const match = fullContent.match(questionStartRegex);
 
         let answersOnlyContent = fullContent;
@@ -209,6 +207,7 @@ const AssignmentGrader = () => {
           answersOnlyContent = fullContent.substring(match.index);
         }
         setStudentAnswersForGrading(answersOnlyContent); // Store only answers for grading
+        console.log("Student answers for grading (first 500 chars):", answersOnlyContent.substring(0, 500)); // Debug log
 
         showSuccess("Student SQL file uploaded successfully!");
         setGradingResults(null); // Clear previous results on new upload
@@ -270,12 +269,9 @@ const AssignmentGrader = () => {
       } else {
         showSuccess("Assignment graded successfully!");
         const gradedResults = data.results.map((item: QueryResult) => {
-          // Extract question ID like "Q1", "Q2", etc. from "--Q1", "--Q2", etc.
-          const questionIdMatch = item.question.match(/--(?:Q|Question)(\d+)/i);
-          const normalizedQuestionId = questionIdMatch && questionIdMatch[1] ? `Q${questionIdMatch[1]}` : item.question;
-          
+          // The edge function now returns question IDs in 'Q#' format, so no further normalization needed here.
           const grade = calculateQuestionGrade(
-            normalizedQuestionId, // Pass the correctly normalized questionId
+            item.question, // item.question should now be 'Q1', 'Q2', etc.
             item.student.sql,
             item.model.sql,
             item.student.result,
@@ -343,7 +339,7 @@ const AssignmentGrader = () => {
           <Textarea
             placeholder="Student's SQL will appear here after upload..."
             value={studentSql}
-            onChange={(e) => setSqlInput(e.target.value)}
+            onChange={(e) => setStudentSql(e.target.value)} // Changed from setSqlInput
             rows={7}
             className="font-mono text-sm"
           />

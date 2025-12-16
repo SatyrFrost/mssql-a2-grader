@@ -93,7 +93,8 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
   const lines = normalizedSqlContent.split('\n');
   let currentQuestionId = '';
   let currentSqlBuffer: string[] = [];
-  let statementCounter = 1; // For generic question IDs if --Q is missing
+  // No longer need statementCounter as questionId will always be derived from the comment
+  // let statementCounter = 1; 
 
   const processBuffer = () => {
     if (currentSqlBuffer.length > 0) {
@@ -115,7 +116,8 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
 
         if (sqlParts.length > 0) {
           questionBlocks.push({
-            questionId: currentQuestionId || `Statement ${statementCounter++}`,
+            // Ensure currentQuestionId is set, otherwise it's an error in parsing
+            questionId: currentQuestionId || 'Unknown Question', 
             fullSql: fullSqlForQuestion,
             sqlParts: sqlParts,
           });
@@ -128,12 +130,13 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
   const questionBlocks: QuestionBlock[] = [];
   for (const line of lines) {
     const trimmedLine = line.trim();
-    // FIX: Update regex to match both --Q# and --Question#
-    const questionMatch = trimmedLine.match(/^(?:--Q\d+|--Question\d+)$/i); 
+    // Updated regex to be more robust and capture the number for 'Q#' format
+    const questionMatch = trimmedLine.match(/^--\s*(?:Q|Question)\s*(\d+)/i); 
 
     if (questionMatch) {
       processBuffer(); // Process the previous question's buffer
-      currentQuestionId = questionMatch[0]; // Use match[0] to get the full matched string (--Q1 or --Question1)
+      // Standardize question ID to 'Q1', 'Q2', etc.
+      currentQuestionId = `Q${questionMatch[1]}`; 
     } else {
       currentSqlBuffer.push(line);
     }
@@ -219,7 +222,7 @@ serve(async (req) => {
       }
       
       results.push({
-        question: studentBlock?.questionId || modelBlock?.questionId || `Question ${i + 1}`,
+        question: studentBlock?.questionId || modelBlock?.questionId || `Q${i + 1}`, // Fallback to Q# if no ID found
         student: {
           sql: studentBlock?.fullSql || 'N/A', // Use fullSql for display
           result: studentResultsForQuestion, // Now an array of results
