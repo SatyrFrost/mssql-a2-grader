@@ -96,6 +96,8 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
   // No longer need statementCounter as questionId will always be derived from the comment
   // let statementCounter = 1; 
 
+  const questionBlocks: QuestionBlock[] = [];
+
   const processBuffer = () => {
     if (currentSqlBuffer.length > 0) {
       const fullSqlForQuestion = currentSqlBuffer.join('\n').trim();
@@ -115,26 +117,26 @@ const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
           });
 
         if (sqlParts.length > 0) {
-          questionBlocks.push({
-            // Ensure currentQuestionId is set, otherwise it's an error in parsing
-            questionId: currentQuestionId || 'Unknown Question', 
-            fullSql: fullSqlForQuestion,
-            sqlParts: sqlParts,
-          });
+          if (currentQuestionId) { // ONLY PUSH IF A VALID QUESTION ID HAS BEEN SET
+            questionBlocks.push({
+              questionId: currentQuestionId,
+              fullSql: fullSqlForQuestion,
+              sqlParts: sqlParts,
+            });
+          }
         }
       }
     }
     currentSqlBuffer = [];
   };
 
-  const questionBlocks: QuestionBlock[] = [];
   for (const line of lines) {
     const trimmedLine = line.trim();
     // Updated regex to be more robust and capture the number for 'Q#' format
     const questionMatch = trimmedLine.match(/^--\s*(?:Q|Question)\s*(\d+)/i); 
 
     if (questionMatch) {
-      processBuffer(); // Process the previous question's buffer
+      processBuffer(); // Process the previous block (could be preamble or a question)
       // Standardize question ID to 'Q1', 'Q2', etc.
       currentQuestionId = `Q${questionMatch[1]}`; 
     } else {
