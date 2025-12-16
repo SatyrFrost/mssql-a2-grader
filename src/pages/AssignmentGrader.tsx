@@ -84,15 +84,6 @@ const AssignmentGrader = () => {
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
-    // Extract declared parameter name for Q12
-    let declaredParamName: string | null = null;
-    if (questionId === 'Q12') {
-      const paramMatch = studentSql.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
-      if (paramMatch && paramMatch[1]) {
-        declaredParamName = paramMatch[1];
-      }
-    }
-
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
       if (typeof ruleDefinition === 'number') {
         maxScore += ruleDefinition; 
@@ -178,9 +169,13 @@ const AssignmentGrader = () => {
           if (ruleName.includes('FETCH_NEXT')) {
             const matches = studentSql.match(regex);
             let expectedCount = 0;
-            if (ruleName.includes('_1_Q12') || ruleName.includes('_1_Q13') || ruleName.includes('_1')) expectedCount = 1;
-            if (ruleName.includes('_2_Q12') || ruleName.includes('_2_Q13') || ruleName.includes('_2')) expectedCount = 2;
-            if (ruleName.includes('_Q14')) expectedCount = 1; // Q14 has only one FETCH_NEXT_Q14 rule
+            if (ruleName.includes('FETCH_NEXT_1')) { // Covers Q11, Q12, Q13
+                expectedCount = 1;
+            } else if (ruleName.includes('FETCH_NEXT_2')) { // Covers Q11, Q12, Q13
+                expectedCount = 2;
+            } else if (ruleName.includes('FETCH_NEXT_Q14')) { // Specific for Q14
+                expectedCount = 1;
+            }
 
             if (matches && matches.length >= expectedCount) {
               score += ruleDefinition.weight;
@@ -201,15 +196,26 @@ const AssignmentGrader = () => {
     }
 
     // Specific check for Q12 parameter name mismatch
-    if (questionId === 'Q12' && declaredParamName) {
+    if (questionId === 'Q12') {
+      const paramMatch = studentSql.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
+      const declaredParamName = paramMatch && paramMatch[1] ? paramMatch[1] : null;
+
       const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\s+(?:Car\.)?RegistrationID\s*=\s*@(\w+)/i);
-      if (whereClauseMatch && whereClauseMatch[1]) {
-        const usedParamName = whereClauseMatch[1];
+      const usedParamName = whereClauseMatch && whereClauseMatch[1] ? whereClauseMatch[1] : null;
+
+      if (declaredParamName && usedParamName) {
         if (usedParamName !== declaredParamName) {
           const deduction = 0.5; 
           score = Math.max(0, score - deduction); 
           feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
+        } else {
+          // Optional: Add positive feedback if they match, if it's a complex rule
+          // feedback.push(`+0.0 for correct parameter usage: Declared '@${declaredParamName}' and used '@${usedParamName}' in WHERE clause.`);
         }
+      } else {
+        // This feedback helps debug if the regexes themselves are failing
+        if (!declaredParamName) feedback.push(`-0 for Q12 parameter mismatch check: Could not find declared parameter name.`);
+        if (!usedParamName) feedback.push(`-0 for Q12 parameter mismatch check: Could not find used parameter name in WHERE clause.`);
       }
     }
 
