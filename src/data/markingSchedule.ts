@@ -104,7 +104,7 @@ export const markingSchedule: {
     "REGEX::PRINT_YEAR_MAKE_MODEL_Q12": { regex: "(?:PRINT|print)\\s+'Year:\\s*'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:\\s*\\+\\s*'(?:\\s*)?Make:\\s*'(?:\\s*\\+\\s*@\\w+))?(?:\\s*\\+\\s*'(?:\\s*)?Model:\\s*'(?:\\s*\\+\\s*@\\w+))?(?:;)?", weight: 1.25 },
     "REGEX::PRINT_COLOUR_OWNERS_KM_Q12": { regex: "(?=.*(?:PRINT|print).*?(?:Colour|Color).*?(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?=.*(?:PRINT|print).*?(?:Owners).*?(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?=.*(?:PRINT|print).*?(?:Kilometres|Kilometers).*?(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)", weight: 1.0 },
     "REGEX::PRINT_PRICE": { regex: "(?:PRINT|print)\\s+'Price:\\s*\\$?'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)(?:;)?", weight: 0.5 },
-    "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+CarDetails\\s+'ALP394'", weight: 0.5 }
+    "REGEX::EXEC_CAR_DETAILS": { regex: "EXEC\\s+CarDetails\\s+(?:@\\w+\\s*=\\s*)?'ALP394'", weight: 0.5 }
   },
   "Q13": {
     "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+(?:PROCEDURE|PROC)\\s+(?:SalespersonDetails|GetSalespersonDetails)", weight: 0.5 },
