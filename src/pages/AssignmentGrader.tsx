@@ -348,40 +348,21 @@ const AssignmentGrader = () => {
     let output = "";
     const questionsToInclude = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"];
 
-    const regexRuleDisplayMap: { [key: string]: string } = {
-      "REGEX::WHERE_NOT_IN_OR_LEFT_JOIN_IS_NULL": "WHERE .. NOT IN",
-      "REGEX::SUBQUERY_OR_JOIN_CONDITION": "Subquery",
-      "REGEX::LEFT_OUTER_JOIN": "LEFT OUTER JOIN",
-    };
-
     questionsToInclude.forEach((qId, index) => {
       const marking = markingSchedule[qId];
       if (marking) {
-        output += `${qId}\n`;
+        // Removed: output += `${qId}\n`;
         for (const ruleName in marking) {
           const ruleDefinition = marking[ruleName];
           let weight: number;
-          let displayName = ruleName;
 
           if (typeof ruleDefinition === 'number') {
             weight = ruleDefinition;
           } else { // It's an object with regex and weight
             weight = ruleDefinition.weight;
-            // Check if this regex rule has a specific display name
-            if (regexRuleDisplayMap[ruleName]) {
-              displayName = regexRuleDisplayMap[ruleName];
-            } else if (ruleName.startsWith("REGEX::")) {
-              // For other REGEX rules not explicitly mapped, try to clean up the name
-              displayName = ruleName.replace("REGEX::", "").replace(/_/g, " ");
-            }
           }
           
-          // Special handling for [labels]
-          if (ruleName === '[labels]') {
-              displayName = 'Labels';
-          }
-
-          output += `${displayName}\t${weight}\n`;
+          output += `${weight}\n`; // Only output the weight
         }
         // Add two empty lines between questions
         if (index < questionsToInclude.length - 1) {
