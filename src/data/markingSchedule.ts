@@ -109,17 +109,15 @@ export const markingSchedule: {
   "Q13": {
     "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+(?:PROCEDURE|PROC)\\s+(?:SalespersonDetails|GetSalespersonDetails)", weight: 0.5 },
     "REGEX::PARAM_SPID_TYPE": { regex: "@\\w+\\s+(?:AS\\s+)?(?:VARCHAR\\(20\\)|INT)", weight: 0.5 },
-    "REGEX::DECLARE_FiN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:50|100)\\)(?:;)?", weight: 0.5 },
-    "REGEX::DECLARE_FaN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:50|100)\\)(?:;)?", weight: 0.5 },
-    "REGEX::DECLARE_Ph_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:20|100)\\)(?:;)?", weight: 0.5 },
-    "REGEX::SELECT_SP_COLUMNS": { regex: "SELECT\\s+(?:\\w+\\.)?SalesPersonID,\\s*(?:\\w+\\.)?FirstName,\\s*(?:\\w+\\.)?FamilyName,\\s*(?:\\w+\\.)?Phone", weight: 1.5 },
+    "REGEX::DECLARE_ALL_VARS_Q13": { regex: "(?=(?:.*DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:10|20|50|100)\\)){3})", weight: 1.5 },
+    "REGEX::SELECT_SP_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\b(?:Salesperson\\.)?SalesPersonID\\b)(?=[^;]*\\b(?:Salesperson\\.)?Phone\\b)(?=[^;]*\\b(?:Salesperson\\.)?FirstName\\b)(?=[^;]*\\b(?:Salesperson\\.)?FamilyName\\b)", weight: 1.5 },
     "REGEX::FROM_SALESPERSON": { regex: "FROM\\s+Salesperson(?:\\s+\\w+)?", weight: 0.5 },
     "REGEX::WHERE_SALESPERSONID_SPID": { regex: "WHERE\\s+(?:\\w+\\.)?SalespersonID\\s*=\\s*@\\w+", weight: 1.0 },
-    "REGEX::FETCH_NEXT_COUNT_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+CURSOR\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 1.0 },
-    "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'SALESPERSON\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
+    "REGEX::FETCH_NEXT_COUNT_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 1.0 },
+    "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'(?:Sal(?:e|a)person\\s+Details|SALESPERSON\\s+DETAILS)(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_Q13": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
-    "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s+'Salesperson\\s+ID:\\s*'(?:\\s*\\+\\s*@\\w+)?\\s*\\+\\s*'\\s*Phone:\\s*'(?:\\s*\\+\\s*@\\w+)?", weight: 1.0 },
-    "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s+'Name:\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+\\s*'\\s*'\\s*\\+\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s+'(?:Sal(?:e|a)perso(?:o)?n\\s+ID|Salesperson\\s+ID)(?:\\s*:)?'(?:\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?)\\s*\\+?\\s*'(?:\\s*)?(?:phone|Phone)(?:\\s*:)?'(?:\\s*\\+\\s*@\\w+)?", weight: 1.0 },
+    "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s+'(?:Name|NAME)(?:\\s*:)?'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'(?:\\s*)?'?\\s*\\+?\\s*@\\w+", weight: 0.5 },
     "REGEX::EXEC_SP_DETAILS_Q13": { regex: "EXEC\\s+(?:SalespersonDetails|GetSalespersonDetails)\\s+(?:@SalespersonID\\s*=\\s*)?1", weight: 1.0 }
   },
   "Q14": {
