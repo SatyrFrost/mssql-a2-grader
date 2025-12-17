@@ -116,8 +116,8 @@ export const markingSchedule: {
     "REGEX::FETCH_NEXT_COUNT_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@\\w+\\s+INTO\\s+@\\w+(?:,\\s*@\\w+){3}", weight: 1.0 },
     "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'(?:Sal(?:e|a)person\\s+Details|SALESPERSON\\s+DETAILS)(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_Q13": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
-    "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s+'(?:Salesperson\\s+ID|SalespersonID)(?:\\s*:)?'\\s*\\+\\s*(?:CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*)?@\\w+\\)?(?:\\s*\\+\\s*'(?:[^']*)')*\\s*\\+\\s*'(?:Phone|phone)(?:\\s*:)?'\\s*\\+\\s*@\\w+", weight: 1.0 },
-    "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s+'(?:Name|NAME)(?:\\s*:)?'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'(?:\\s*)?'?\\s*\\+?\\s*@\\w+", weight: 0.5 },
+    "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s*(?=[^;]*\\b(?:Salesperson\\s+ID|SalespersonID)(?:\\s*:)?)(?=[^;]*@\\w+)(?=[^;]*\\b(?:Phone|phone)(?:\\s*:)?)(?=[^;]*@\\w+)", weight: 1.0 },
+    "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s*(?=[^;]*\\b(?:Name|NAME)(?:\\s*:)?)(?=[^;]*@\\w+)(?=[^;]*@\\w+)", weight: 0.5 },
     "REGEX::EXEC_SP_DETAILS_Q13": { regex: "EXEC\\s+(?:SalespersonDetails|GetSalespersonDetails)\\s+(?:@SalespersonID\\s*=\\s*)?1", weight: 1.0 }
   },
   "Q14": {
