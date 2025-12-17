@@ -461,11 +461,55 @@ const AssignmentGrader = () => {
   };
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(excelExportText);
-    setCopyButtonText("Copied!");
-    setTimeout(() => {
-      setCopyButtonText("Copy to Clipboard");
-    }, 2000); // Revert text after 2 seconds
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(excelExportText)
+        .then(() => {
+          showSuccess("Copied to clipboard!");
+          setCopyButtonText("Copied!");
+          setTimeout(() => {
+            setCopyButtonText("Copy to Clipboard");
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy using clipboard API:", err);
+          fallbackCopyTextToClipboard(excelExportText);
+        });
+    } else {
+      fallbackCopyTextToClipboard(excelExportText);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0"; // Make it invisible
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showSuccess("Copied to clipboard (fallback)!");
+        setCopyButtonText("Copied!");
+        setTimeout(() => {
+          setCopyButtonText("Copy to Clipboard");
+        }, 2000);
+      } else {
+        showError("Failed to copy to clipboard (fallback). Please copy manually.");
+      }
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+      showError("Failed to copy to clipboard (fallback). Please copy manually.");
+    }
+
+    document.body.removeChild(textArea);
   };
 
   const handleClearPage = () => {
