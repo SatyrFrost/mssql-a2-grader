@@ -329,11 +329,13 @@ const AssignmentGrader = () => {
             let questionActualScoreSum = 0; // Sum of individual marks for this question
 
             item.grade.feedback.forEach(f => {
-              const positiveMatch = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
-              const zeroMatch = f.match(/^-0 for/); // Match "-0 for"
+              // Match for positive or negative marks (e.g., "+1 for", "-0.5 for")
+              const positiveOrNegativeMatch = f.match(/^([+-]\d+(\.\d+)?) for/); 
+              // Match for explicit zero marks (e.g., "-0 for")
+              const zeroMatch = f.match(/^-0 for/); 
 
-              if (positiveMatch && positiveMatch[1]) {
-                const mark = parseFloat(positiveMatch[1]);
+              if (positiveOrNegativeMatch && positiveOrNegativeMatch[1]) {
+                const mark = parseFloat(positiveOrNegativeMatch[1]);
                 questionActualScoreSum += mark; // Add to sum for this question
                 individualMarksForQuestion.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
               } else if (zeroMatch) {
