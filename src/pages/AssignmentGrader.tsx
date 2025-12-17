@@ -62,9 +62,6 @@ const AssignmentGrader = () => {
     return questionText; // Fallback if format doesn't match
   };
 
-  // Generic regex for matching any FETCH NEXT statement structure
-  const FETCH_NEXT_GENERIC_REGEX = /FETCH\s+NEXT\s+FROM\s+@\w+\s+INTO\s+@\w+(?:,\s*@\w+)*\s*(?:;|\n|$)/gis;
-
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
     rawQuestionId: string,
@@ -89,9 +86,9 @@ const AssignmentGrader = () => {
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
-    // Count total FETCH NEXT occurrences once for the student's SQL
-    const allFetchNextMatches = Array.from(studentSql.matchAll(FETCH_NEXT_GENERIC_REGEX));
-    const totalFetchNextCount = allFetchNextMatches.length;
+    // Track FETCH NEXT matches for Q11 and Q13 specifically
+    let fetchNextQ11Count = 0;
+    let fetchNextQ13Count = 0;
 
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
       let ruleMaxScore = 0;
@@ -186,19 +183,32 @@ const AssignmentGrader = () => {
         try {
           const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
-          if (ruleName.includes('FETCH_NEXT_STATEMENT_1_')) { // First FETCH NEXT statement
-            if (totalFetchNextCount >= 1) {
-                ruleEarnedScore = ruleDefinition.weight;
-                feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement.`);
+          // Special handling for FETCH NEXT statements to count occurrences
+          if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q11' || ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q11') {
+            const matches = Array.from(studentSql.matchAll(regex));
+            if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q11' && matches.length >= 1) {
+              fetchNextQ11Count++;
+              ruleEarnedScore = ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement (Q11).`);
+            } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q11' && matches.length >= 2) {
+              fetchNextQ11Count++; // Increment for the second match
+              ruleEarnedScore = ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement (Q11).`);
             } else {
-                feedback.push(`-0 for missing the first 'FETCH NEXT' statement.`);
+              feedback.push(`-0 for missing or incorrect '${ruleName}' (Q11).`);
             }
-          } else if (ruleName.includes('FETCH_NEXT_STATEMENT_2_')) { // Second FETCH NEXT statement (for Q11, Q13)
-            if (totalFetchNextCount >= 2) {
-                ruleEarnedScore = ruleDefinition.weight;
-                feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement.`);
+          } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q13' || ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q13') {
+            const matches = Array.from(studentSql.matchAll(regex));
+            if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q13' && matches.length >= 1) {
+              fetchNextQ13Count++;
+              ruleEarnedScore = ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement (Q13).`);
+            } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q13' && matches.length >= 2) {
+              fetchNextQ13Count++; // Increment for the second match
+              ruleEarnedScore = ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement (Q13).`);
             } else {
-                feedback.push(`-0 for missing the second 'FETCH NEXT' statement.`);
+              feedback.push(`-0 for missing or incorrect '${ruleName}' (Q13).`);
             }
           } else if (regex.test(studentSql)) { 
             ruleEarnedScore = ruleDefinition.weight;
@@ -217,10 +227,10 @@ const AssignmentGrader = () => {
 
     // Specific check for Q12 parameter name mismatch
     if (questionId === 'Q12') {
-      const paramMatch = studentSql.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
+      const paramMatch = studentSql.match(/CREATE\\s+(?:PROCEDURE|PROC)\\s+CarDetails\\s*\\(\\s*@(\\w+)\\s+(?:AS\\s+)?VARCHAR/i);
       const declaredParamName = paramMatch && paramMatch[1] ? paramMatch[1] : null;
 
-      const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\s+(?:Car\.)?RegistrationID\s*=\s*@(\w+)/i);
+      const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@(\\w+)/i);
       const usedParamName = whereClauseMatch && whereClauseMatch[1] ? whereClauseMatch[1] : null;
 
       if (declaredParamName && usedParamName) {
@@ -248,7 +258,7 @@ const AssignmentGrader = () => {
 
         // Find the start of the actual questions (e.g., --Q1 or --Question1)
         // Made regex more robust to handle potential whitespace variations
-        const questionStartRegex = /(^--\s*(?:Q|Question)\s*\d+)/im; 
+        const questionStartRegex = /(^--\\s*(?:Q|Question)\\s*\\d+)/im; 
         const match = fullContent.match(questionStartRegex);
 
         let answersOnlyContent = fullContent;
