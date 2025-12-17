@@ -496,17 +496,17 @@ const AssignmentGrader = () => {
     try {
       const successful = document.execCommand('copy');
       if (successful) {
-        showSuccess("Copied to clipboard (fallback)!");
+        showSuccess("Copied to clipboard!"); // Removed "(fallback)"
         setCopyButtonText("Copied!");
         setTimeout(() => {
           setCopyButtonText("Copy to Clipboard");
         }, 2000);
       } else {
-        showError("Failed to copy to clipboard (fallback). Please copy manually.");
+        showError("Failed to copy to clipboard. Please copy manually.");
       }
     } catch (err) {
       console.error('Fallback: Oops, unable to copy', err);
-      showError("Failed to copy to clipboard (fallback). Please copy manually.");
+      showError("Failed to copy to clipboard. Please copy manually.");
     }
 
     document.body.removeChild(textArea);
