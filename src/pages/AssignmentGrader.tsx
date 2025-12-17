@@ -468,6 +468,23 @@ const AssignmentGrader = () => {
     }, 2000); // Revert text after 2 seconds
   };
 
+  const handleClearPage = () => {
+    setStudentSql("");
+    setStudentAnswersForGrading("");
+    setFileName("");
+    setGradingResults(null);
+    setTotalScore(0);
+    setTotalMaxScore(0);
+    setExcelExportText("");
+    setCopyButtonText("Copy to Clipboard");
+    // Reset the file input element
+    const fileInput = document.getElementById("student-sql-file") as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+    showSuccess("Page cleared! Ready for a new assignment.");
+  };
+
   const percentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(1) : "0.0";
 
   return (
@@ -502,6 +519,13 @@ const AssignmentGrader = () => {
             className="font-mono text-sm"
           />
           
+          <Button 
+            onClick={handleClearPage} 
+            variant="outline" 
+            className="w-full"
+          >
+            Clear Page
+          </Button>
           <Button 
             onClick={handleGradeAssignment} 
             className="w-full" 
