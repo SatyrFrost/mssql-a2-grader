@@ -11,8 +11,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { markingSchedule } from "@/data/markingSchedule"; // Import the new marking schedule object
- // Import MadeWithDyad
+import { markingSchedule } from "@/data/markingSchedule";
 
 interface QueryResult {
   question: string;
@@ -39,6 +38,7 @@ const AssignmentGrader = () => {
   const [isGrading, setIsGrading] = useState<boolean>(false);
   const [totalScore, setTotalScore] = useState<number>(0);
   const [totalMaxScore, setTotalMaxScore] = useState<number>(0);
+  const [excelExportText, setExcelExportText] = useState<string>(""); // New state for Excel export text
 
   // Helper function to count occurrences of a keyword in SQL
   const countKeywordOccurrences = (sql: string, keyword: string): number => {
@@ -243,6 +243,7 @@ const AssignmentGrader = () => {
         setGradingResults(null); // Clear previous results on new upload
         setTotalScore(0);
         setTotalMaxScore(0);
+        setExcelExportText(""); // Clear Excel export text
       };
       reader.onerror = () => {
         showError("Failed to read student SQL file.");
@@ -261,6 +262,7 @@ const AssignmentGrader = () => {
     setGradingResults(null); // Clear previous results
     setTotalScore(0);
     setTotalMaxScore(0);
+    setExcelExportText(""); // Clear Excel export text
     
     try {
       console.log("Calling edge function with payload sizes:", {
@@ -322,6 +324,15 @@ const AssignmentGrader = () => {
         });
         setTotalScore(currentTotalScore);
         setTotalMaxScore(currentTotalMaxScore);
+
+        // Generate Excel export text
+        const exportText = gradedResults.map(item => {
+          if (!item.grade) return "";
+          const feedbackLines = item.grade.feedback.map(f => `- ${f}`).join('\n');
+          return `Question ${item.question}:\nScore: ${item.grade.score.toFixed(1)} / ${item.grade.maxScore.toFixed(1)}\nFeedback:\n${feedbackLines}`;
+        }).filter(Boolean).join('\n\n');
+        setExcelExportText(exportText);
+
       }
     } catch (error: any) {
       console.error("Client-side grading error:", error);
@@ -448,6 +459,30 @@ const AssignmentGrader = () => {
                 {index < gradingResults.length - 1 && <Separator className="my-4" />}
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {excelExportText && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Mark Breakdown for Excel</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea
+              value={excelExportText}
+              readOnly
+              rows={15}
+              className="font-mono text-sm bg-background resize"
+              placeholder="Mark breakdown will appear here after grading..."
+            />
+            <Button
+              onClick={() => navigator.clipboard.writeText(excelExportText)}
+              className="w-full"
+              disabled={!excelExportText}
+            >
+              Copy to Clipboard
+            </Button>
           </CardContent>
         </Card>
       )}
