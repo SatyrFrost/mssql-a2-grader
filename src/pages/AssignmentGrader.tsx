@@ -39,6 +39,7 @@ const AssignmentGrader = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const [totalMaxScore, setTotalMaxScore] = useState<number>(0);
   const [excelExportText, setExcelExportText] = useState<string>(""); // New state for Excel export text
+  const [copyButtonText, setCopyButtonText] = useState<string>("Copy to Clipboard"); // New state for copy button text
 
   // Helper function to count occurrences of a keyword in SQL
   const countKeywordOccurrences = (sql: string, keyword: string): number => {
@@ -244,6 +245,7 @@ const AssignmentGrader = () => {
         setTotalScore(0);
         setTotalMaxScore(0);
         setExcelExportText(""); // Clear Excel export text
+        setCopyButtonText("Copy to Clipboard"); // Reset copy button text
       };
       reader.onerror = () => {
         showError("Failed to read student SQL file.");
@@ -263,6 +265,7 @@ const AssignmentGrader = () => {
     setTotalScore(0);
     setTotalMaxScore(0);
     setExcelExportText(""); // Clear Excel export text
+    setCopyButtonText("Copy to Clipboard"); // Reset copy button text
     
     try {
       console.log("Calling edge function with payload sizes:", {
@@ -375,6 +378,14 @@ const AssignmentGrader = () => {
     }
   };
 
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(excelExportText);
+    setCopyButtonText("Copied!");
+    setTimeout(() => {
+      setCopyButtonText("Copy to Clipboard");
+    }, 2000); // Revert text after 2 seconds
+  };
+
   const percentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(1) : "0.0";
 
   return (
@@ -448,11 +459,11 @@ const AssignmentGrader = () => {
                   placeholder="Mark breakdown will appear here after grading..."
                 />
                 <Button
-                  onClick={() => navigator.clipboard.writeText(excelExportText)}
+                  onClick={handleCopyClick} // Use the new handler
                   className="w-full"
                   disabled={!excelExportText}
                 >
-                  Copy to Clipboard
+                  {copyButtonText} {/* Use the state variable for text */}
                 </Button>
               </CardContent>
             </Card>
