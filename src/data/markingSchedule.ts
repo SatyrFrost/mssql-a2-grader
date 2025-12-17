@@ -45,16 +45,14 @@ export const markingSchedule: {
   "Q7": {
     "SELECT": 0.5,
     "FROM": 0.5,
-    "JOIN_CLAUSES": 2, // Combined mark for both joins
+    "JOIN_CLAUSES": 2,
     "GROUP": 0.5,
     "ORDER": 0.5
   },
   "Q8": {
     "SELECT": 1,
     "FROM": 1,
-    "REGEX::WHERE_NOT_IN_OR_LEFT_JOIN_IS_NULL": { regex: "(WHERE\\s+(?:\\w+\\.)?ProductID\\s+NOT\\s+IN\\s*\\(|LEFT\\s+(?:OUTER\\s+)?JOIN\\s+\\w+\\s+ON\\s+\\w+\\.\\w+\\s*=\\s+\\w+\\.\\w+\\s+WHERE\\s+\\w+\\.\\w+\\s+IS\\s+NULL)", weight: 1 }
-,
-    "REGEX::SUBQUERY_OR_JOIN_CONDITION": { regex: "(SELECT\\s+(?:DISTINCT\\s+)?(?:\\w+\\.)?ProductID\\s+FROM\\s+OrdersProduct(?:\\s+\\w+)?|ON\\s+p\\.ProductID\\s*=\\s+op\\.ProductID)", weight: 1 }
+    "REGEX::UNSOLD_PRODUCTS_LOGIC": { regex: "(?=.*(?:WHERE\\s+(?:\\w+\\.)?ProductID\\s+NOT\\s+IN\\s*\\(|LEFT\\s+(?:OUTER\\s+)?JOIN\\s+\\w+\\s+ON\\s+\\w+\\.\\w+\\s*=\\s+\\w+\\.\\w+\\s+WHERE\\s+\\w+\\.\\w+\\s+IS\\s+NULL))(?=.*(?:SELECT\\s+(?:DISTINCT\\s+)?(?:\\w+\\.)?ProductID\\s+FROM\\s+OrdersProduct|ON\\s+p\\.ProductID\\s*=\\s+op\\.ProductID))", weight: 2 }
   },
   "Q9": {
     "SELECT": 0.5,
