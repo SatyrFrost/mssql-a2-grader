@@ -28,6 +28,7 @@ interface QueryResult {
     score: number;
     maxScore: number;
     feedback: string[];
+    ruleScores: { [ruleName: string]: number }; // Added to store individual rule scores
   };
 }
 
@@ -68,32 +69,29 @@ const AssignmentGrader = () => {
     modelSql: string,
     studentResult: any,
     modelResult: any
-  ): { score: number; maxScore: number; feedback: string[] } => {
-    let score = 0;
-    let maxScore = 0;
+  ): { score: number; maxScore: number; feedback: string[]; ruleScores: { [ruleName: string]: number } } => {
+    let totalQuestionScore = 0;
+    let totalQuestionMaxScore = 0;
     const feedback: string[] = [];
+    const ruleScores: { [ruleName: string]: number } = {}; // Store individual rule scores
 
     const questionId = rawQuestionId; 
     const questionMarking = markingSchedule[questionId];
 
     if (!questionMarking) {
       feedback.push(`No marking schedule found for ${questionId}.`);
-      return { score: 0, maxScore: 0, feedback };
+      return { score: 0, maxScore: 0, feedback, ruleScores };
     }
 
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
-    // Debugging for Q14
-    if (questionId === 'Q14') {
-      console.log(`--- Debugging Q14 ---`);
-      console.log(`Student SQL for Q14 (raw): "${studentSql}"`);
-      console.log(`Student SQL for Q14 (JSON stringified): ${JSON.stringify(studentSql)}`);
-    }
-
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
+      let ruleMaxScore = 0;
+      let ruleEarnedScore = 0;
+
       if (typeof ruleDefinition === 'number') {
-        maxScore += ruleDefinition; 
+        ruleMaxScore = ruleDefinition;
 
         if (ruleName === '[labels]') {
           if (questionId === 'Q5') {
@@ -102,7 +100,7 @@ const AssignmentGrader = () => {
               const selectContent = selectClauseMatch[1];
               const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
               if (asCount >= 5) { 
-                score += ruleDefinition;
+                ruleEarnedScore = ruleDefinition;
                 feedback.push(`+${ruleDefinition} for correctly including aliases for aggregate functions.`);
               } else {
                 feedback.push(`-0 for missing or insufficient aliases for aggregate functions.`);
@@ -113,7 +111,7 @@ const AssignmentGrader = () => {
           } else {
             const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
             if (!studentHasError) {
-               score += ruleDefinition;
+               ruleEarnedScore = ruleDefinition;
                feedback.push(`+${ruleDefinition} for labels (query executed successfully).`);
             } else {
                feedback.push(`-0 for labels (query execution failed).`);
@@ -122,7 +120,7 @@ const AssignmentGrader = () => {
         } else if (ruleName === 'JOIN' && questionId === 'Q4') { 
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
           if (joinCount >= 1) { 
-            score += ruleDefinition;
+            ruleEarnedScore = ruleDefinition;
             feedback.push(`+${ruleDefinition} for including a 'JOIN' clause.`);
           } else {
             feedback.push(`-0 for missing a 'JOIN' clause.`);
@@ -131,7 +129,7 @@ const AssignmentGrader = () => {
           const joinNumber = parseInt(ruleName.split(' ')[1]);
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
           if (joinCount >= joinNumber) {
-            score += ruleDefinition;
+            ruleEarnedScore = ruleDefinition;
             feedback.push(`+${ruleDefinition} for including at least ${joinNumber} 'JOIN' clause(s).`);
           } else {
             feedback.push(`-0 for missing the ${joinNumber}${joinNumber === 1 ? 'st' : joinNumber === 2 ? 'nd' : 'th'} 'JOIN' clause.`);
@@ -140,14 +138,14 @@ const AssignmentGrader = () => {
           const andNumber = parseInt(ruleName.split(' ')[1]);
           const andCount = countKeywordOccurrences(studentSqlLower, 'and');
           if (andCount >= andNumber) {
-            score += ruleDefinition;
+            ruleEarnedScore = ruleDefinition;
             feedback.push(`+${ruleDefinition} for including at least ${andNumber} 'AND' clause(s).`);
           } else {
             feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
           }
         } else if (ruleName === 'WHERE .. NOT IN') {
           if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
-            score += ruleDefinition;
+            ruleEarnedScore = ruleDefinition;
             feedback.push(`+${ruleDefinition} for 'WHERE ... NOT IN' clause.`);
           } else {
             feedback.push(`-0 for missing 'WHERE ... NOT IN' clause.`);
@@ -155,13 +153,13 @@ const AssignmentGrader = () => {
         } else if (ruleName === 'Subquery') {
           const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
           if (normalizedStudentSql.includes(expectedSubquery)) {
-            score += ruleDefinition;
+            ruleEarnedScore = ruleDefinition;
             feedback.push(`+${ruleDefinition} for correct subquery '${expectedSubquery}'.`);
           } else {
             feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
           }
         } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) { 
-          score += ruleDefinition;
+          ruleEarnedScore = ruleDefinition;
           feedback.push(`+${ruleDefinition} for '${ruleName}'.`);
         } else if (ruleDefinition === 0) {
           // No score, no feedback for 0-weight rules.
@@ -169,7 +167,7 @@ const AssignmentGrader = () => {
           feedback.push(`-0 for missing '${ruleName}'.`);
         }
       } else if (typeof ruleDefinition === 'object' && ruleDefinition !== null && 'regex' in ruleDefinition && 'weight' in ruleDefinition) {
-        maxScore += ruleDefinition.weight; 
+        ruleMaxScore = ruleDefinition.weight; 
         try {
           const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
@@ -178,13 +176,13 @@ const AssignmentGrader = () => {
             const expectedCount = 2; // All these questions (Q11-Q14) expect two FETCH NEXT statements
 
             if (matches && matches.length >= expectedCount) {
-              score += ruleDefinition.weight;
+              ruleEarnedScore = ruleDefinition.weight;
               feedback.push(`+${ruleDefinition.weight} for including ${expectedCount} 'FETCH NEXT' statements.`);
             } else {
               feedback.push(`-0 for missing or insufficient 'FETCH NEXT' statements (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
             }
           } else if (regex.test(studentSql)) { 
-            score += ruleDefinition.weight;
+            ruleEarnedScore = ruleDefinition.weight;
             feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\`.`);
           } else {
             feedback.push(`-0 for not matching pattern: \`${ruleName}\`.`);
@@ -193,6 +191,9 @@ const AssignmentGrader = () => {
           feedback.push(`Error in regex pattern '${ruleDefinition.regex}' for rule '${ruleName}': ${e.message}`);
         }
       }
+      ruleScores[ruleName] = ruleEarnedScore; // Store the earned score for this rule
+      totalQuestionScore += ruleEarnedScore; // Accumulate total score
+      totalQuestionMaxScore += ruleMaxScore; // Accumulate total max score
     }
 
     // Specific check for Q12 parameter name mismatch
@@ -206,16 +207,15 @@ const AssignmentGrader = () => {
       if (declaredParamName && usedParamName) {
         if (usedParamName !== declaredParamName) {
           const deduction = 0.5; 
-          score = Math.max(0, score - deduction); 
+          totalQuestionScore = Math.max(0, totalQuestionScore - deduction); 
           feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
+          // If we want to reflect this in ruleScores, we'd need a specific rule for it in markingSchedule
+          // For now, it's a deduction from the total question score.
         }
-      } else {
-        // These debug messages are helpful for understanding why the check might fail
-        // feedback.push(`Debug: Q12 param check - Declared: ${declaredParamName}, Used: ${usedParamName}`);
       }
     }
 
-    return { score, maxScore, feedback };
+    return { score: totalQuestionScore, maxScore: totalQuestionMaxScore, feedback, ruleScores };
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -350,21 +350,25 @@ const AssignmentGrader = () => {
 
     questionsToInclude.forEach((qId, index) => {
       const marking = markingSchedule[qId];
-      if (marking) {
-        // Removed: output += `${qId}\n`;
-        for (const ruleName in marking) {
-          const ruleDefinition = marking[ruleName];
-          let weight: number;
+      const gradedItem = gradingResults?.find(item => item.question === qId); // Find the graded result for this question
 
-          if (typeof ruleDefinition === 'number') {
-            weight = ruleDefinition;
-          } else { // It's an object with regex and weight
-            weight = ruleDefinition.weight;
-          }
-          
-          output += `${weight}\n`; // Only output the weight
+      if (marking && gradedItem?.grade?.ruleScores) {
+        for (const ruleName in marking) {
+          // Retrieve the student's earned score for this specific rule
+          const studentEarnedScore = gradedItem.grade.ruleScores[ruleName] !== undefined
+            ? gradedItem.grade.ruleScores[ruleName]
+            : 0; // Default to 0 if for some reason not found
+          output += `${studentEarnedScore}\n`;
         }
         // Add two empty lines between questions
+        if (index < questionsToInclude.length - 1) {
+          output += "\n\n";
+        }
+      } else if (marking) {
+        // If no grading results yet, or ruleScores is missing, output 0s for all rules
+        for (const ruleName in marking) {
+          output += `0\n`;
+        }
         if (index < questionsToInclude.length - 1) {
           output += "\n\n";
         }
