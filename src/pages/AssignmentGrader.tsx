@@ -319,38 +319,116 @@ const AssignmentGrader = () => {
         // Calculate total score and generate Excel export text
         let currentTotalScore = 0;
         let currentTotalMaxScore = 0;
-        const excelIndividualMarksByQuestion: string[][] = []; // Store individual marks for each question
+        const excelIndividualMarksByQuestion: string[][] = [];
 
         gradedResults.forEach((item: QueryResult) => {
           if (item.grade) {
-            currentTotalMaxScore += item.grade.maxScore; // Max score calculation remains the same
+            currentTotalMaxScore += item.grade.maxScore;
 
             const individualMarksForQuestion: string[] = [];
-            let questionActualScoreSum = 0; // Sum of individual marks for this question
+            let questionActualScoreSum = 0;
 
-            item.grade.feedback.forEach(f => {
-              // Match for positive or negative marks (e.g., "+1 for", "-0.5 for")
-              const positiveOrNegativeMatch = f.match(/^([+-]\d+(\.\d+)?) for/); 
-              // Match for explicit zero marks (e.g., "-0 for")
-              const zeroMatch = f.match(/^-0 for/); 
+            const questionId = item.question;
+            const questionMarking = markingSchedule[questionId];
+            const studentSqlForEvaluation = item.student.sql; // Use the full student SQL for evaluation
+            const studentSqlLower = studentSqlForEvaluation.toLowerCase();
+            const normalizedStudentSql = normalizeSqlForComparison(studentSqlForEvaluation);
 
-              if (positiveOrNegativeMatch && positiveOrNegativeMatch[1]) {
-                const mark = parseFloat(positiveOrNegativeMatch[1]);
-                questionActualScoreSum += mark; // Add to sum for this question
-                individualMarksForQuestion.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
-              } else if (zeroMatch) {
-                // If feedback indicates a 0 mark, add 0 to the sum and push '0'
-                questionActualScoreSum += 0;
-                individualMarksForQuestion.push('0');
+            if (questionMarking) {
+              for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
+                let markForRule = 0;
+
+                if (typeof ruleDefinition === 'number') {
+                  // Handle number-based rules
+                  if (ruleName === '[labels]') {
+                    if (questionId === 'Q5') {
+                      const selectClauseMatch = studentSqlForEvaluation.match(/SELECT\s+(.*?)\s+FROM/is);
+                      if (selectClauseMatch && selectClauseMatch[1]) {
+                        const selectContent = selectClauseMatch[1];
+                        const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
+                        if (asCount >= 5) {
+                          markForRule = ruleDefinition;
+                        }
+                      }
+                    } else {
+                      const studentHasError = Array.isArray(item.student.result) ? item.student.result.some(r => r?.error) : item.student.result?.error;
+                      if (!studentHasError) {
+                        markForRule = ruleDefinition;
+                      }
+                    }
+                  } else if (ruleName === 'JOIN' && questionId === 'Q4') {
+                    const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+                    if (joinCount >= 1) {
+                      markForRule = ruleDefinition;
+                    }
+                  } else if (ruleName.startsWith('JOIN ')) {
+                    const joinNumber = parseInt(ruleName.split(' ')[1]);
+                    const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+                    if (joinCount >= joinNumber) {
+                      markForRule = ruleDefinition;
+                    }
+                  } else if (ruleName.startsWith('AND ')) {
+                    const andNumber = parseInt(ruleName.split(' ')[1]);
+                    const andCount = countKeywordOccurrences(studentSqlLower, 'and');
+                    if (andCount >= andNumber) {
+                      markForRule = ruleDefinition;
+                    }
+                  } else if (ruleName === 'WHERE .. NOT IN') {
+                    if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
+                      markForRule = ruleDefinition;
+                    }
+                  } else if (ruleName === 'Subquery') {
+                    const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
+                    if (normalizedStudentSql.includes(expectedSubquery)) {
+                      markForRule = ruleDefinition;
+                    }
+                  } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) {
+                    markForRule = ruleDefinition;
+                  }
+                } else if (typeof ruleDefinition === 'object' && ruleDefinition !== null && 'regex' in ruleDefinition && 'weight' in ruleDefinition) {
+                  // Handle regex-based rules
+                  try {
+                    const regex = new RegExp(ruleDefinition.regex, 'gis');
+                    if (ruleName.includes('FETCH_NEXT_COUNT')) {
+                      const matches = studentSqlForEvaluation.match(regex);
+                      const expectedCount = 2;
+                      if (matches && matches.length >= expectedCount) {
+                        markForRule = ruleDefinition.weight;
+                      }
+                    } else if (regex.test(studentSqlForEvaluation)) {
+                      markForRule = ruleDefinition.weight;
+                    }
+                  } catch (e) {
+                    console.error(`Error evaluating regex for Excel output: ${ruleDefinition.regex}`, e);
+                    markForRule = 0; // Mark as 0 if regex itself is invalid
+                  }
+                }
+                
+                questionActualScoreSum += markForRule;
+                individualMarksForQuestion.push(markForRule % 1 === 0 ? markForRule.toString() : markForRule.toFixed(1));
               }
-              // For other feedback types (e.g., errors, non-mark related), do nothing for individual marks
-            });
+
+              // Apply Q12 specific deduction if applicable, and add to individual marks
+              if (questionId === 'Q12') {
+                const paramMatch = studentSqlForEvaluation.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
+                const declaredParamName = paramMatch && paramMatch[1] ? paramMatch[1] : null;
+
+                const whereClauseMatch = studentSqlForEvaluation.match(/(?:AND|WHERE)\s+(?:Car\.)?RegistrationID\s*=\s*@(\w+)/i);
+                const usedParamName = whereClauseMatch && whereClauseMatch[1] ? whereClauseMatch[1] : null;
+
+                if (declaredParamName && usedParamName && usedParamName !== declaredParamName) {
+                  const deduction = 0.5;
+                  questionActualScoreSum = Math.max(0, questionActualScoreSum - deduction);
+                  individualMarksForQuestion.push(`-${deduction.toFixed(1)}`); // Add the deduction as a separate line
+                }
+              }
+            }
             
-            currentTotalScore += questionActualScoreSum; // Add the sum of individual marks for this question to the total
+            currentTotalScore += questionActualScoreSum;
             excelIndividualMarksByQuestion.push(individualMarksForQuestion);
           }
         });
-        setTotalScore(currentTotalScore); // Set the total score based on the sum of individual marks
+        setTotalScore(currentTotalScore);
         setTotalMaxScore(currentTotalMaxScore);
 
         // Generate Excel export text from the collected individual marks
