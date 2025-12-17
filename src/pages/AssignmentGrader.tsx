@@ -540,7 +540,15 @@ const AssignmentGrader = () => {
           <CardTitle>Upload Student SQL File</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Label htmlFor="student-sql-file">Choose a .txt or .sql file</Label>
+          <div className="flex items-center justify-between gap-4"> {/* Flex container for label and button */}
+            <Label htmlFor="student-sql-file" className="flex-grow">Choose a .txt or .sql file</Label>
+            <Button 
+              onClick={handleClearPage} 
+              className="bg-green-300 hover:bg-green-400 text-white px-3 py-2 h-auto text-sm" // Smaller padding and height
+            >
+              Clear Page
+            </Button>
+          </div>
           <Input
             id="student-sql-file"
             type="file"
@@ -563,12 +571,6 @@ const AssignmentGrader = () => {
             className="font-mono text-sm"
           />
           
-          <Button 
-            onClick={handleClearPage} 
-            className="w-full bg-green-300 hover:bg-green-400 text-white"
-          >
-            Clear Page
-          </Button>
           <Button 
             onClick={handleGradeAssignment} 
             className="w-full bg-blue-400 hover:bg-blue-500 text-white" 
