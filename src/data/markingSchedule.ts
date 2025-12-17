@@ -128,6 +128,6 @@ export const markingSchedule: {
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1.0 },
     "REGEX::RETURN_CALCULATION": { regex: "RETURN\\s+@km\\s*\\*\\s*0\\.62", weight: 2.0 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1.0 },
-    "REGEX::PRINT_MILEAGE_CALCULATION": { regex: "\\s*PRINT\\s+.*?Mileage:\\s*'.*?CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*dbo\\.KmToMiles\\(@\\w+\\)\\)\\s*\\+\\s*'(?:\\s*)?miles'\\s*$", weight: 2.0 }
+    "REGEX::PRINT_MILEAGE_CALCULATION": { regex: "\\s*PRINT\\s+.*?Mileage:\\s*'.*?CONVERT\\(VARCHAR\\((?:\\d+|MAX)\\),\\s*(?:dbo\\.KmToMiles\\(@\\w+\\)|@\\w+)\\)\\s*\\+\\s*'(?:\\s*)?miles'\\s*$", weight: 2.0 }
   }
 };
