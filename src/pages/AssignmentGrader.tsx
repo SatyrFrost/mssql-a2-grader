@@ -502,7 +502,7 @@ const AssignmentGrader = () => {
             type="file"
             accept=".txt,.sql"
             onChange={handleFileUpload}
-            className="block w-full text-sm text-gray-500
+            className="h-[50px] block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-md file:border-0
               file:text-sm file:font-semibold
