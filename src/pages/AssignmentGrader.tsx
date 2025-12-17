@@ -330,7 +330,7 @@ const AssignmentGrader = () => {
 
             const questionId = item.question;
             const questionMarking = markingSchedule[questionId];
-            const studentSqlForEvaluation = item.student.sql; // Use the full student SQL for evaluation
+            const studentSqlForEvaluation = item.student.sql;
             const studentSqlLower = studentSqlForEvaluation.toLowerCase();
             const normalizedStudentSql = normalizeSqlForComparison(studentSqlForEvaluation);
 
@@ -405,7 +405,8 @@ const AssignmentGrader = () => {
                 }
                 
                 questionActualScoreSum += markForRule;
-                individualMarksForQuestion.push(markForRule % 1 === 0 ? markForRule.toString() : markForRule.toFixed(1));
+                // Format to 2 decimal places, then parse back to float to remove trailing zeros if it's .00 or .X0
+                individualMarksForQuestion.push(parseFloat(markForRule.toFixed(2)).toString());
               }
 
               // Apply Q12 specific deduction if applicable, and add to individual marks
@@ -419,7 +420,8 @@ const AssignmentGrader = () => {
                 if (declaredParamName && usedParamName && usedParamName !== declaredParamName) {
                   const deduction = 0.5;
                   questionActualScoreSum = Math.max(0, questionActualScoreSum - deduction);
-                  individualMarksForQuestion.push(`-${deduction.toFixed(1)}`); // Add the deduction as a separate line
+                  // Ensure deduction is also formatted correctly
+                  individualMarksForQuestion.push(`-${parseFloat(deduction.toFixed(2)).toString()}`); // Add the deduction as a separate line
                 }
               }
             }
