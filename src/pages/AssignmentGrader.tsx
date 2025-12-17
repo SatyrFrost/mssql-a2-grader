@@ -360,9 +360,9 @@ const AssignmentGrader = () => {
             : 0; // Default to 0 if for some reason not found
           output += `${studentEarnedScore}\n`;
         }
-        // Add two empty lines between questions
+        // Add three empty lines between questions
         if (index < questionsToInclude.length - 1) {
-          output += "\n\n";
+          output += "\n\n\n"; // Changed from "\n\n" to "\n\n\n"
         }
       } else if (marking) {
         // If no grading results yet, or ruleScores is missing, output 0s for all rules
@@ -370,7 +370,7 @@ const AssignmentGrader = () => {
           output += `0\n`;
         }
         if (index < questionsToInclude.length - 1) {
-          output += "\n\n";
+          output += "\n\n\n"; // Changed from "\n\n" to "\n\n\n"
         }
       }
     });
