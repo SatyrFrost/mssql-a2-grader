@@ -54,7 +54,7 @@ const AssignmentGrader = () => {
 
   // Helper function to format question titles for display
   const displayQuestionTitle = (questionText: string) => {
-    const match = questionText.match(/--(?:Q|Question)(\d+)/i); // Match --Q# or --Question# and capture the number
+    const match = questionText.match(/--(?:Q|Question)\s*(\d+)/i); // Match --Q# or --Question# and capture the number
     if (match && match[1]) {
       return `Question ${match[1]}`; // Use the captured number
     }
@@ -83,6 +83,13 @@ const AssignmentGrader = () => {
 
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
+
+    // Debugging for Q14
+    if (questionId === 'Q14') {
+      console.log(`--- Debugging Q14 ---`);
+      console.log(`Student SQL for Q14 (raw): "${studentSql}"`);
+      console.log(`Student SQL for Q14 (JSON stringified): ${JSON.stringify(studentSql)}`);
+    }
 
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
       if (typeof ruleDefinition === 'number') {
