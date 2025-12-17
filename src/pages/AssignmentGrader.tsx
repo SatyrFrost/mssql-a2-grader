@@ -335,6 +335,8 @@ const AssignmentGrader = () => {
     }
   };
 
+  const percentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(1) : "0.0";
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8">
       <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
@@ -383,7 +385,7 @@ const AssignmentGrader = () => {
             <CardTitle className="flex justify-between items-center">
               Grading Results
               <Badge variant="default" className="text-lg px-4 py-2">
-                Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)}
+                Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)} = {percentage}%
               </Badge>
             </CardTitle>
           </CardHeader>
