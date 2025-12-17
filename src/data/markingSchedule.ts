@@ -45,8 +45,7 @@ export const markingSchedule: {
   "Q7": {
     "SELECT": 0.5,
     "FROM": 0.5,
-    "JOIN 1": 1,
-    "JOIN 2": 1,
+    "JOIN_CLAUSES": 2, // Combined mark for both joins
     "GROUP": 0.5,
     "ORDER": 0.5
   },

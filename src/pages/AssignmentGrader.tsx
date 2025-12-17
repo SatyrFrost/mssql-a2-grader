@@ -117,6 +117,14 @@ const AssignmentGrader = () => {
                feedback.push(`-0 for labels (query execution failed).`);
             }
           }
+        } else if (ruleName === 'JOIN_CLAUSES' && questionId === 'Q7') {
+          const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
+          if (joinCount >= 2) { // Check for at least two joins
+            ruleEarnedScore = ruleDefinition; // This would be 2
+            feedback.push(`+${ruleDefinition} for including at least two 'JOIN' clauses.`);
+          } else {
+            feedback.push(`-0 for missing at least two 'JOIN' clauses (found ${joinCount}).`);
+          }
         } else if (ruleName === 'JOIN' && questionId === 'Q4') { 
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
           if (joinCount >= 1) { 
@@ -362,7 +370,7 @@ const AssignmentGrader = () => {
         }
         // Add three empty lines between questions
         if (index < questionsToInclude.length - 1) {
-          output += "\n\n\n"; // Changed from "\n\n" to "\n\n\n"
+          output += "\n\n\n"; 
         }
       } else if (marking) {
         // If no grading results yet, or ruleScores is missing, output 0s for all rules
@@ -370,7 +378,7 @@ const AssignmentGrader = () => {
           output += `0\n`;
         }
         if (index < questionsToInclude.length - 1) {
-          output += "\n\n\n"; // Changed from "\n\n" to "\n\n\n"
+          output += "\n\n\n"; 
         }
       }
     });
