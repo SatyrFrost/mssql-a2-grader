@@ -17,9 +17,9 @@ const Index = () => {
           <Link to="/sql-question">
             <Button variant="outline" className="px-8 py-4 text-lg">Try SQL Editor</Button>
           </Link>
-          <Link to="/help">
+          {/* Removed: <Link to="/help">
             <Button variant="outline" className="px-8 py-4 text-lg">Help</Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
       <MadeWithDyad />
