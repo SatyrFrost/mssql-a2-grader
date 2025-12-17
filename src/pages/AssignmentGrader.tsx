@@ -344,6 +344,54 @@ const AssignmentGrader = () => {
 
   const percentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(1) : "0.0";
 
+  const generateExcelOutput = () => {
+    let output = "";
+    const questionsToInclude = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"];
+
+    const regexRuleDisplayMap: { [key: string]: string } = {
+      "REGEX::WHERE_NOT_IN_OR_LEFT_JOIN_IS_NULL": "WHERE .. NOT IN",
+      "REGEX::SUBQUERY_OR_JOIN_CONDITION": "Subquery",
+      "REGEX::LEFT_OUTER_JOIN": "LEFT OUTER JOIN",
+    };
+
+    questionsToInclude.forEach((qId, index) => {
+      const marking = markingSchedule[qId];
+      if (marking) {
+        output += `${qId}\n`;
+        for (const ruleName in marking) {
+          const ruleDefinition = marking[ruleName];
+          let weight: number;
+          let displayName = ruleName;
+
+          if (typeof ruleDefinition === 'number') {
+            weight = ruleDefinition;
+          } else { // It's an object with regex and weight
+            weight = ruleDefinition.weight;
+            // Check if this regex rule has a specific display name
+            if (regexRuleDisplayMap[ruleName]) {
+              displayName = regexRuleDisplayMap[ruleName];
+            } else if (ruleName.startsWith("REGEX::")) {
+              // For other REGEX rules not explicitly mapped, try to clean up the name
+              displayName = ruleName.replace("REGEX::", "").replace(/_/g, " ");
+            }
+          }
+          
+          // Special handling for [labels]
+          if (ruleName === '[labels]') {
+              displayName = 'Labels';
+          }
+
+          output += `${displayName}\t${weight}\n`;
+        }
+        // Add two empty lines between questions
+        if (index < questionsToInclude.length - 1) {
+          output += "\n\n";
+        }
+      }
+    });
+    return output;
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8">
       <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
@@ -448,6 +496,25 @@ const AssignmentGrader = () => {
                 {index < gradingResults.length - 1 && <Separator className="my-4" />}
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {gradingResults && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Excel-Friendly Output (Q1-Q10)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={generateExcelOutput()}
+              readOnly
+              rows={20} 
+              className="font-mono text-sm bg-background resize"
+            />
+            <p className="text-sm text-muted-foreground mt-2">
+              Copy the text above and paste it into an Excel spreadsheet.
+            </p>
           </CardContent>
         </Card>
       )}
