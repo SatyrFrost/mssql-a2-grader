@@ -325,12 +325,11 @@ const AssignmentGrader = () => {
         setTotalScore(currentTotalScore);
         setTotalMaxScore(currentTotalMaxScore);
 
-        // Generate Excel export text
+        // Generate Excel export text - ONLY THE SCORE
         const exportText = gradedResults.map(item => {
           if (!item.grade) return "";
-          const feedbackLines = item.grade.feedback.map(f => `- ${f}`).join('\n');
-          return `Question ${item.question}:\nScore: ${item.grade.score.toFixed(1)} / ${item.grade.maxScore.toFixed(1)}\nFeedback:\n${feedbackLines}`;
-        }).filter(Boolean).join('\n\n');
+          return item.grade.score.toFixed(1);
+        }).filter(Boolean).join('\n'); // Join with newline for one score per line
         setExcelExportText(exportText);
 
       }
