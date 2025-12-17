@@ -28,7 +28,6 @@ interface QueryResult {
     score: number;
     maxScore: number;
     feedback: string[];
-    ruleScores: { [ruleName: string]: number }; // Added to store individual rule scores
   };
 }
 
@@ -69,33 +68,32 @@ const AssignmentGrader = () => {
     modelSql: string,
     studentResult: any,
     modelResult: any
-  ): { score: number; maxScore: number; feedback: string[]; ruleScores: { [ruleName: string]: number } } => {
-    let totalQuestionScore = 0;
-    let totalQuestionMaxScore = 0;
+  ): { score: number; maxScore: number; feedback: string[] } => {
+    let score = 0;
+    let maxScore = 0;
     const feedback: string[] = [];
-    const ruleScores: { [ruleName: string]: number } = {}; // Store individual rule scores
 
     const questionId = rawQuestionId; 
     const questionMarking = markingSchedule[questionId];
 
     if (!questionMarking) {
       feedback.push(`No marking schedule found for ${questionId}.`);
-      return { score: 0, maxScore: 0, feedback, ruleScores };
+      return { score: 0, maxScore: 0, feedback };
     }
 
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
 
-    // Track FETCH NEXT matches for Q11 and Q13 specifically
-    let fetchNextQ11Count = 0;
-    let fetchNextQ13Count = 0;
+    // Debugging for Q14
+    if (questionId === 'Q14') {
+      console.log(`--- Debugging Q14 ---`);
+      console.log(`Student SQL for Q14 (raw): "${studentSql}"`);
+      console.log(`Student SQL for Q14 (JSON stringified): ${JSON.stringify(studentSql)}`);
+    }
 
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
-      let ruleMaxScore = 0;
-      let ruleEarnedScore = 0;
-
       if (typeof ruleDefinition === 'number') {
-        ruleMaxScore = ruleDefinition;
+        maxScore += ruleDefinition; 
 
         if (ruleName === '[labels]') {
           if (questionId === 'Q5') {
@@ -104,7 +102,7 @@ const AssignmentGrader = () => {
               const selectContent = selectClauseMatch[1];
               const asCount = (selectContent.match(/\bAS\b/gi) || []).length;
               if (asCount >= 5) { 
-                ruleEarnedScore = ruleDefinition;
+                score += ruleDefinition;
                 feedback.push(`+${ruleDefinition} for correctly including aliases for aggregate functions.`);
               } else {
                 feedback.push(`-0 for missing or insufficient aliases for aggregate functions.`);
@@ -115,24 +113,16 @@ const AssignmentGrader = () => {
           } else {
             const studentHasError = Array.isArray(studentResult) ? studentResult.some(r => r?.error) : studentResult?.error;
             if (!studentHasError) {
-               ruleEarnedScore = ruleDefinition;
+               score += ruleDefinition;
                feedback.push(`+${ruleDefinition} for labels (query executed successfully).`);
             } else {
                feedback.push(`-0 for labels (query execution failed).`);
             }
           }
-        } else if (ruleName === 'JOIN_CLAUSES' && questionId === 'Q7') {
-          const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
-          if (joinCount >= 2) { // Check for at least two joins
-            ruleEarnedScore = ruleDefinition; // This would be 2
-            feedback.push(`+${ruleDefinition} for including at least two 'JOIN' clauses.`);
-          } else {
-            feedback.push(`-0 for missing at least two 'JOIN' clauses (found ${joinCount}).`);
-          }
         } else if (ruleName === 'JOIN' && questionId === 'Q4') { 
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
           if (joinCount >= 1) { 
-            ruleEarnedScore = ruleDefinition;
+            score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for including a 'JOIN' clause.`);
           } else {
             feedback.push(`-0 for missing a 'JOIN' clause.`);
@@ -141,7 +131,7 @@ const AssignmentGrader = () => {
           const joinNumber = parseInt(ruleName.split(' ')[1]);
           const joinCount = countKeywordOccurrences(studentSqlLower, 'join');
           if (joinCount >= joinNumber) {
-            ruleEarnedScore = ruleDefinition;
+            score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for including at least ${joinNumber} 'JOIN' clause(s).`);
           } else {
             feedback.push(`-0 for missing the ${joinNumber}${joinNumber === 1 ? 'st' : joinNumber === 2 ? 'nd' : 'th'} 'JOIN' clause.`);
@@ -150,14 +140,14 @@ const AssignmentGrader = () => {
           const andNumber = parseInt(ruleName.split(' ')[1]);
           const andCount = countKeywordOccurrences(studentSqlLower, 'and');
           if (andCount >= andNumber) {
-            ruleEarnedScore = ruleDefinition;
+            score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for including at least ${andNumber} 'AND' clause(s).`);
           } else {
             feedback.push(`-0 for missing the ${andNumber}${andNumber === 1 ? 'st' : andNumber === 2 ? 'nd' : 'th'} 'AND' clause.`);
           }
         } else if (ruleName === 'WHERE .. NOT IN') {
           if (studentSqlLower.includes('where') && studentSqlLower.includes('not in')) {
-            ruleEarnedScore = ruleDefinition;
+            score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for 'WHERE ... NOT IN' clause.`);
           } else {
             feedback.push(`-0 for missing 'WHERE ... NOT IN' clause.`);
@@ -165,13 +155,13 @@ const AssignmentGrader = () => {
         } else if (ruleName === 'Subquery') {
           const expectedSubquery = normalizeSqlForComparison('SELECT ProductID FROM OrdersProduct');
           if (normalizedStudentSql.includes(expectedSubquery)) {
-            ruleEarnedScore = ruleDefinition;
+            score += ruleDefinition;
             feedback.push(`+${ruleDefinition} for correct subquery '${expectedSubquery}'.`);
           } else {
             feedback.push(`-0 for missing or incorrect subquery '${expectedSubquery}'.`);
           }
         } else if (ruleDefinition > 0 && studentSqlLower.includes(ruleName.toLowerCase())) { 
-          ruleEarnedScore = ruleDefinition;
+          score += ruleDefinition;
           feedback.push(`+${ruleDefinition} for '${ruleName}'.`);
         } else if (ruleDefinition === 0) {
           // No score, no feedback for 0-weight rules.
@@ -179,39 +169,22 @@ const AssignmentGrader = () => {
           feedback.push(`-0 for missing '${ruleName}'.`);
         }
       } else if (typeof ruleDefinition === 'object' && ruleDefinition !== null && 'regex' in ruleDefinition && 'weight' in ruleDefinition) {
-        ruleMaxScore = ruleDefinition.weight; 
+        maxScore += ruleDefinition.weight; 
         try {
           const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
-          // Special handling for FETCH NEXT statements to count occurrences
-          if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q11' || ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q11') {
-            const matches = Array.from(studentSql.matchAll(regex));
-            if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q11' && matches.length >= 1) {
-              fetchNextQ11Count++;
-              ruleEarnedScore = ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement (Q11).`);
-            } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q11' && matches.length >= 2) {
-              fetchNextQ11Count++; // Increment for the second match
-              ruleEarnedScore = ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement (Q11).`);
+          if (ruleName.includes('FETCH_NEXT_COUNT')) {
+            const matches = studentSql.match(regex);
+            const expectedCount = 2; // All these questions (Q11-Q14) expect two FETCH NEXT statements
+
+            if (matches && matches.length >= expectedCount) {
+              score += ruleDefinition.weight;
+              feedback.push(`+${ruleDefinition.weight} for including ${expectedCount} 'FETCH NEXT' statements.`);
             } else {
-              feedback.push(`-0 for missing or incorrect '${ruleName}' (Q11).`);
-            }
-          } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q13' || ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q13') {
-            const matches = Array.from(studentSql.matchAll(regex));
-            if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_1_Q13' && matches.length >= 1) {
-              fetchNextQ13Count++;
-              ruleEarnedScore = ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement (Q13).`);
-            } else if (ruleName === 'REGEX::FETCH_NEXT_STATEMENT_2_Q13' && matches.length >= 2) {
-              fetchNextQ13Count++; // Increment for the second match
-              ruleEarnedScore = ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement (Q13).`);
-            } else {
-              feedback.push(`-0 for missing or incorrect '${ruleName}' (Q13).`);
+              feedback.push(`-0 for missing or insufficient 'FETCH NEXT' statements (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
             }
           } else if (regex.test(studentSql)) { 
-            ruleEarnedScore = ruleDefinition.weight;
+            score += ruleDefinition.weight;
             feedback.push(`+${ruleDefinition.weight} for matching pattern: \`${ruleName}\`.`);
           } else {
             feedback.push(`-0 for not matching pattern: \`${ruleName}\`.`);
@@ -220,31 +193,29 @@ const AssignmentGrader = () => {
           feedback.push(`Error in regex pattern '${ruleDefinition.regex}' for rule '${ruleName}': ${e.message}`);
         }
       }
-      ruleScores[ruleName] = ruleEarnedScore; // Store the earned score for this rule
-      totalQuestionScore += ruleEarnedScore; // Accumulate total score
-      totalQuestionMaxScore += ruleMaxScore; // Accumulate total max score
     }
 
     // Specific check for Q12 parameter name mismatch
     if (questionId === 'Q12') {
-      const paramMatch = studentSql.match(/CREATE\\s+(?:PROCEDURE|PROC)\\s+CarDetails\\s*\\(\\s*@(\\w+)\\s+(?:AS\\s+)?VARCHAR/i);
+      const paramMatch = studentSql.match(/CREATE\s+(?:PROCEDURE|PROC)\s+CarDetails\s*\(\s*@(\w+)\s+(?:AS\s+)?VARCHAR/i);
       const declaredParamName = paramMatch && paramMatch[1] ? paramMatch[1] : null;
 
-      const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\\s+(?:Car\\.)?RegistrationID\\s*=\\s*@(\\w+)/i);
+      const whereClauseMatch = studentSql.match(/(?:AND|WHERE)\s+(?:Car\.)?RegistrationID\s*=\s*@(\w+)/i);
       const usedParamName = whereClauseMatch && whereClauseMatch[1] ? whereClauseMatch[1] : null;
 
       if (declaredParamName && usedParamName) {
         if (usedParamName !== declaredParamName) {
           const deduction = 0.5; 
-          totalQuestionScore = Math.max(0, totalQuestionScore - deduction); 
+          score = Math.max(0, score - deduction); 
           feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
-          // If we want to reflect this in ruleScores, we'd need a specific rule for it in markingSchedule
-          // For now, it's a deduction from the total question score.
         }
+      } else {
+        // These debug messages are helpful for understanding why the check might fail
+        // feedback.push(`Debug: Q12 param check - Declared: ${declaredParamName}, Used: ${usedParamName}`);
       }
     }
 
-    return { score: totalQuestionScore, maxScore: totalQuestionMaxScore, feedback, ruleScores };
+    return { score, maxScore, feedback };
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,7 +229,7 @@ const AssignmentGrader = () => {
 
         // Find the start of the actual questions (e.g., --Q1 or --Question1)
         // Made regex more robust to handle potential whitespace variations
-        const questionStartRegex = /(^--\\s*(?:Q|Question)\\s*\\d+)/im; 
+        const questionStartRegex = /(^--\s*(?:Q|Question)\s*\d+)/im; 
         const match = fullContent.match(questionStartRegex);
 
         let answersOnlyContent = fullContent;
@@ -373,39 +344,6 @@ const AssignmentGrader = () => {
 
   const percentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(1) : "0.0";
 
-  const generateExcelOutput = () => {
-    let output = "";
-    const questionsToInclude = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14"];
-
-    questionsToInclude.forEach((qId, index) => {
-      const marking = markingSchedule[qId];
-      const gradedItem = gradingResults?.find(item => item.question === qId); // Find the graded result for this question
-
-      if (marking && gradedItem?.grade?.ruleScores) {
-        for (const ruleName in marking) {
-          // Retrieve the student's earned score for this specific rule
-          const studentEarnedScore = gradedItem.grade.ruleScores[ruleName] !== undefined
-            ? gradedItem.grade.ruleScores[ruleName]
-            : 0; // Default to 0 if for some reason not found
-          output += `${studentEarnedScore}\n`;
-        }
-        // Add three empty lines between questions
-        if (index < questionsToInclude.length - 1) {
-          output += "\n\n\n"; 
-        }
-      } else if (marking) {
-        // If no grading results yet, or ruleScores is missing, output 0s for all rules
-        for (const ruleName in marking) {
-          output += `0\n`;
-        }
-        if (index < questionsToInclude.length - 1) {
-          output += "\n\n\n"; 
-        }
-      }
-    });
-    return output;
-  };
-
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8">
       <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
@@ -510,25 +448,6 @@ const AssignmentGrader = () => {
                 {index < gradingResults.length - 1 && <Separator className="my-4" />}
               </div>
             ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {gradingResults && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Excel-Friendly Output (Q1-Q14)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={generateExcelOutput()}
-              readOnly
-              rows={20} 
-              className="font-mono text-sm bg-background resize"
-            />
-            <p className="text-sm text-muted-foreground mt-2">
-              Copy the text above and paste it into an Excel spreadsheet.
-            </p>
           </CardContent>
         </Card>
       )}
