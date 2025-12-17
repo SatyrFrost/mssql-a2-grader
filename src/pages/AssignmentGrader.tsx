@@ -331,11 +331,14 @@ const AssignmentGrader = () => {
 
           const individualMarks: string[] = [];
           item.grade.feedback.forEach(f => {
-            const match = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
-            if (match && match[1]) {
-              const mark = parseFloat(match[1]);
-              // Format mark: integer if no decimal, otherwise one decimal place
+            const positiveMatch = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
+            const zeroMatch = f.match(/^-0 for/); // Match "-0 for"
+
+            if (positiveMatch && positiveMatch[1]) {
+              const mark = parseFloat(positiveMatch[1]);
               individualMarks.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
+            } else if (zeroMatch) {
+              individualMarks.push('0'); // Explicitly print '0' for zero marks
             }
           });
           return individualMarks.join('\n'); // Join individual marks for this question with newlines
@@ -407,93 +410,104 @@ const AssignmentGrader = () => {
       </Card>
 
       {gradingResults && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              Grading Results
-              <Badge variant="default" className="text-lg px-4 py-2">
-                Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)} = {percentage}%
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {gradingResults.map((item, index) => (
-              <div 
-                key={index} 
-                className="border p-4 rounded-md" 
-                style={{ backgroundColor: 'white' }}
-              >
-                <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
-                  {displayQuestionTitle(item.question)}
-                  {item.grade && (
-                    <Badge variant="outline" className="text-md px-3 py-1">
-                      Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
-                    </Badge>
-                  )}
-                </h3>
-                
-                {item.grade && (
-                  <div className="mb-4">
-                    <h4 className="font-medium text-md mb-1">Feedback:</h4>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground">
-                      {item.grade.feedback.map((f, i) => (
-                        <li key={i}>{f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+        <>
+          {/* Total Score Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                Overall Assignment Score
+                <Badge variant="default" className="text-lg px-4 py-2">
+                  Total Score: {totalScore.toFixed(1)} / {totalMaxScore.toFixed(1)} = {percentage}%
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+          </Card>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div>
-                    <h5 className="font-medium mt-2">Student's SQL:</h5>
-                    <Textarea
-                      value={item.student.sql}
-                      readOnly
-                      rows={10}
-                      className="font-mono text-sm bg-background resize"
-                    />
+          {/* Mark Breakdown for Excel Card */}
+          {excelExportText && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Mark Breakdown for Excel</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  value={excelExportText}
+                  readOnly
+                  rows={15}
+                  className="font-mono text-sm bg-background resize"
+                  placeholder="Mark breakdown will appear here after grading..."
+                />
+                <Button
+                  onClick={() => navigator.clipboard.writeText(excelExportText)}
+                  className="w-full"
+                  disabled={!excelExportText}
+                >
+                  Copy to Clipboard
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Detailed Grading Results Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Grading Feedback</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {gradingResults.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="border p-4 rounded-md" 
+                  style={{ backgroundColor: 'white' }}
+                >
+                  <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
+                    {displayQuestionTitle(item.question)}
+                    {item.grade && (
+                      <Badge variant="outline" className="text-md px-3 py-1">
+                        Score: {item.grade.score.toFixed(1)} / {item.grade.maxScore.toFixed(1)}
+                      </Badge>
+                    )}
+                  </h3>
+                  
+                  {item.grade && (
+                    <div className="mb-4">
+                      <h4 className="font-medium text-md mb-1">Feedback:</h4>
+                      <ul className="list-disc list-inside text-sm text-muted-foreground">
+                        {item.grade.feedback.map((f, i) => (
+                          <li key={i}>{f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium mt-2">Student's SQL:</h5>
+                      <Textarea
+                        value={item.student.sql}
+                        readOnly
+                        rows={10}
+                        className="font-mono text-sm bg-background resize"
+                      />
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium mt-2">Model Answer SQL:</h5>
+                      <Textarea
+                        value={item.model.sql}
+                        readOnly
+                        rows={10}
+                        className="font-mono text-sm bg-background resize"
+                      />
+                    </div>
                   </div>
                   
-                  <div>
-                    <h5 className="font-medium mt-2">Model Answer SQL:</h5>
-                    <Textarea
-                      value={item.model.sql}
-                      readOnly
-                      rows={10}
-                      className="font-mono text-sm bg-background resize"
-                    />
-                  </div>
+                  {index < gradingResults.length - 1 && <Separator className="my-4" />}
                 </div>
-                
-                {index < gradingResults.length - 1 && <Separator className="my-4" />}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {excelExportText && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Mark Breakdown for Excel</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              value={excelExportText}
-              readOnly
-              rows={15}
-              className="font-mono text-sm bg-background resize"
-              placeholder="Mark breakdown will appear here after grading..."
-            />
-            <Button
-              onClick={() => navigator.clipboard.writeText(excelExportText)}
-              className="w-full"
-              disabled={!excelExportText}
-            >
-              Copy to Clipboard
-            </Button>
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
