@@ -11,11 +11,14 @@ const Index = () => {
           Upload student assignments and compare them against model answers.
         </p>
         <div className="flex flex-col space-y-4">
-          <Link to="/grade">
+          <Link to="/">
             <Button className="px-8 py-4 text-lg">Go to Assignment Grader</Button>
           </Link>
           <Link to="/sql-question">
             <Button variant="outline" className="px-8 py-4 text-lg">Try SQL Editor</Button>
+          </Link>
+          <Link to="/help">
+            <Button variant="outline" className="px-8 py-4 text-lg">Help</Button>
           </Link>
         </div>
       </div>

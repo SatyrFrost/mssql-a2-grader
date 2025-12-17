@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AssignmentGrader from "./pages/AssignmentGrader";
-import SqlQuestion from "./pages/SqlQuestion"; // Import the new SQL Question page
+import SqlQuestion from "./pages/SqlQuestion";
+import Help from "./pages/Help"; // Import the new Help page
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<AssignmentGrader />} /> {/* AssignmentGrader is now the default */}
           <Route path="/index" element={<Index />} /> {/* Old Index page moved to /index */}
           <Route path="/sql-question" element={<SqlQuestion />} /> {/* New route for SQL Question Editor */}
+          <Route path="/help" element={<Help />} /> {/* New route for the Help page */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
