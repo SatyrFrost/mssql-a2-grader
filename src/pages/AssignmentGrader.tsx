@@ -521,14 +521,13 @@ const AssignmentGrader = () => {
           
           <Button 
             onClick={handleClearPage} 
-            variant="outline" 
-            className="w-full"
+            className="w-full bg-green-300 hover:bg-green-400 text-white"
           >
             Clear Page
           </Button>
           <Button 
             onClick={handleGradeAssignment} 
-            className="w-full" 
+            className="w-full bg-blue-400 hover:bg-blue-500 text-white" 
             disabled={isGrading}
           >
             {isGrading ? "Grading..." : "Grade Assignment"}
