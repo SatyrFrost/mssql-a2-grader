@@ -313,36 +313,46 @@ const AssignmentGrader = () => {
         });
         setGradingResults(gradedResults);
 
-        // Calculate total score
+        // Calculate total score and generate Excel export text
         let currentTotalScore = 0;
         let currentTotalMaxScore = 0;
+        const excelIndividualMarksByQuestion: string[][] = []; // Store individual marks for each question
+
         gradedResults.forEach((item: QueryResult) => {
           if (item.grade) {
-            currentTotalScore += item.grade.score;
-            currentTotalMaxScore += item.grade.maxScore;
+            currentTotalMaxScore += item.grade.maxScore; // Max score calculation remains the same
+
+            const individualMarksForQuestion: string[] = [];
+            let questionActualScoreSum = 0; // Sum of individual marks for this question
+
+            item.grade.feedback.forEach(f => {
+              const positiveMatch = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
+              const zeroMatch = f.match(/^-0 for/); // Match "-0 for"
+
+              if (positiveMatch && positiveMatch[1]) {
+                const mark = parseFloat(positiveMatch[1]);
+                questionActualScoreSum += mark; // Add to sum for this question
+                individualMarksForQuestion.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
+              } else if (zeroMatch) {
+                // If feedback indicates a 0 mark, add 0 to the sum and push '0'
+                questionActualScoreSum += 0;
+                individualMarksForQuestion.push('0');
+              }
+              // For other feedback types (e.g., errors, non-mark related), do nothing for individual marks
+            });
+            
+            currentTotalScore += questionActualScoreSum; // Add the sum of individual marks for this question to the total
+            excelIndividualMarksByQuestion.push(individualMarksForQuestion);
           }
         });
-        setTotalScore(currentTotalScore);
+        setTotalScore(currentTotalScore); // Set the total score based on the sum of individual marks
         setTotalMaxScore(currentTotalMaxScore);
 
-        // Generate Excel export text - individual marks with three blank lines between questions
-        const exportText = gradedResults.map(item => {
-          if (!item.grade) return "";
-
-          const individualMarks: string[] = [];
-          item.grade.feedback.forEach(f => {
-            const positiveMatch = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
-            const zeroMatch = f.match(/^-0 for/); // Match "-0 for"
-
-            if (positiveMatch && positiveMatch[1]) {
-              const mark = parseFloat(positiveMatch[1]);
-              individualMarks.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
-            } else if (zeroMatch) {
-              individualMarks.push('0'); // Explicitly print '0' for zero marks
-            }
-          });
-          return individualMarks.join('\n'); // Join individual marks for this question with newlines
-        }).filter(Boolean).join('\n\n\n\n'); // Join questions with FOUR newlines for three blank lines
+        // Generate Excel export text from the collected individual marks
+        const exportText = excelIndividualMarksByQuestion
+          .filter(arr => arr.length > 0) // Filter out empty arrays (questions with no marks)
+          .map(arr => arr.join('\n')) // Join individual marks within a question with newlines
+          .join('\n\n\n\n'); // Join questions with FOUR newlines for three blank lines
         setExcelExportText(exportText);
 
       }
