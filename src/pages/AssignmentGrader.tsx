@@ -325,7 +325,7 @@ const AssignmentGrader = () => {
         setTotalScore(currentTotalScore);
         setTotalMaxScore(currentTotalMaxScore);
 
-        // Generate Excel export text - individual marks with two blank lines between questions
+        // Generate Excel export text - individual marks with three blank lines between questions
         const exportText = gradedResults.map(item => {
           if (!item.grade) return "";
 
@@ -333,11 +333,13 @@ const AssignmentGrader = () => {
           item.grade.feedback.forEach(f => {
             const match = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
             if (match && match[1]) {
-              individualMarks.push(parseFloat(match[1]).toFixed(1)); // Extract and format the score
+              const mark = parseFloat(match[1]);
+              // Format mark: integer if no decimal, otherwise one decimal place
+              individualMarks.push(mark % 1 === 0 ? mark.toString() : mark.toFixed(1));
             }
           });
           return individualMarks.join('\n'); // Join individual marks for this question with newlines
-        }).filter(Boolean).join('\n\n\n'); // Join questions with three newlines for two blank lines
+        }).filter(Boolean).join('\n\n\n\n'); // Join questions with FOUR newlines for three blank lines
         setExcelExportText(exportText);
 
       }
