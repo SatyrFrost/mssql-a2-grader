@@ -325,12 +325,19 @@ const AssignmentGrader = () => {
         setTotalScore(currentTotalScore);
         setTotalMaxScore(currentTotalMaxScore);
 
-        // Generate Excel export text - detailed breakdown without question numbers, with two blank lines
+        // Generate Excel export text - individual marks with two blank lines between questions
         const exportText = gradedResults.map(item => {
           if (!item.grade) return "";
-          const feedbackLines = item.grade.feedback.map(f => `- ${f}`).join('\n');
-          return `Score: ${item.grade.score.toFixed(1)} / ${item.grade.maxScore.toFixed(1)}\nFeedback:\n${feedbackLines}`;
-        }).filter(Boolean).join('\n\n\n'); // Three newlines for two blank lines
+
+          const individualMarks: string[] = [];
+          item.grade.feedback.forEach(f => {
+            const match = f.match(/^\+(\d+(\.\d+)?) for/); // Match "+X.X for"
+            if (match && match[1]) {
+              individualMarks.push(parseFloat(match[1]).toFixed(1)); // Extract and format the score
+            }
+          });
+          return individualMarks.join('\n'); // Join individual marks for this question with newlines
+        }).filter(Boolean).join('\n\n\n'); // Join questions with three newlines for two blank lines
         setExcelExportText(exportText);
 
       }
