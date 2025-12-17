@@ -62,6 +62,9 @@ const AssignmentGrader = () => {
     return questionText; // Fallback if format doesn't match
   };
 
+  // Generic regex for matching any FETCH NEXT statement structure
+  const FETCH_NEXT_GENERIC_REGEX = /FETCH\s+NEXT\s+FROM\s+@\w+\s+INTO\s+@\w+(?:,\s*@\w+)*\s*(?:;|\n|$)/gis;
+
   // Function to calculate grade for a single question
   const calculateQuestionGrade = (
     rawQuestionId: string,
@@ -85,6 +88,10 @@ const AssignmentGrader = () => {
 
     const studentSqlLower = studentSql.toLowerCase();
     const normalizedStudentSql = normalizeSqlForComparison(studentSql);
+
+    // Count total FETCH NEXT occurrences once for the student's SQL
+    const allFetchNextMatches = Array.from(studentSql.matchAll(FETCH_NEXT_GENERIC_REGEX));
+    const totalFetchNextCount = allFetchNextMatches.length;
 
     for (const [ruleName, ruleDefinition] of Object.entries(questionMarking)) {
       let ruleMaxScore = 0;
@@ -179,15 +186,19 @@ const AssignmentGrader = () => {
         try {
           const regex = new RegExp(ruleDefinition.regex, 'gis'); 
 
-          if (ruleName.includes('FETCH_NEXT_COUNT')) {
-            const matches = studentSql.match(regex);
-            const expectedCount = 2; // All these questions (Q11-Q14) expect two FETCH NEXT statements
-
-            if (matches && matches.length >= expectedCount) {
-              ruleEarnedScore = ruleDefinition.weight;
-              feedback.push(`+${ruleDefinition.weight} for including ${expectedCount} 'FETCH NEXT' statements.`);
+          if (ruleName.includes('FETCH_NEXT_STATEMENT_1_')) { // First FETCH NEXT statement
+            if (totalFetchNextCount >= 1) {
+                ruleEarnedScore = ruleDefinition.weight;
+                feedback.push(`+${ruleDefinition.weight} for including the first 'FETCH NEXT' statement.`);
             } else {
-              feedback.push(`-0 for missing or insufficient 'FETCH NEXT' statements (found ${matches ? matches.length : 0}, expected ${expectedCount}).`);
+                feedback.push(`-0 for missing the first 'FETCH NEXT' statement.`);
+            }
+          } else if (ruleName.includes('FETCH_NEXT_STATEMENT_2_')) { // Second FETCH NEXT statement (for Q11, Q13)
+            if (totalFetchNextCount >= 2) {
+                ruleEarnedScore = ruleDefinition.weight;
+                feedback.push(`+${ruleDefinition.weight} for including the second 'FETCH NEXT' statement.`);
+            } else {
+                feedback.push(`-0 for missing the second 'FETCH NEXT' statement.`);
             }
           } else if (regex.test(studentSql)) { 
             ruleEarnedScore = ruleDefinition.weight;
@@ -354,7 +365,7 @@ const AssignmentGrader = () => {
 
   const generateExcelOutput = () => {
     let output = "";
-    const questionsToInclude = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"];
+    const questionsToInclude = ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14"];
 
     questionsToInclude.forEach((qId, index) => {
       const marking = markingSchedule[qId];
@@ -496,7 +507,7 @@ const AssignmentGrader = () => {
       {gradingResults && (
         <Card>
           <CardHeader>
-            <CardTitle>Excel-Friendly Output (Q1-Q10)</CardTitle>
+            <CardTitle>Excel-Friendly Output (Q1-Q14)</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
