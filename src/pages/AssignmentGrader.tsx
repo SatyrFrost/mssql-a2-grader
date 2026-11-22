@@ -55,7 +55,7 @@ const AssignmentGrader = () => {
 
   // Helper function to format question titles for display
   const displayQuestionTitle = (questionText: string) => {
-    const match = questionText.match(/--(?:Q|Question)\s*(\d+)/i); // Match --Q# or --Question# and capture the number
+    const match = questionText.match(/(?:--)?(?:Q|Question)?\s*(\d+)/i); // Match Q#, Question #, or --Q# and capture the number
     if (match && match[1]) {
       return `Question ${match[1]}`; // Use the captured number
     }
@@ -228,9 +228,9 @@ const AssignmentGrader = () => {
         const fullContent = e.target?.result as string;
         setStudentSql(fullContent); // Store full content for display
 
-        // Find the start of the actual questions (e.g., --Q1 or --Question1)
-        // Made regex more robust to handle potential whitespace variations
-        const questionStartRegex = /(^--\s*(?:Q|Question)\s*\d+)/im; 
+        // Find the start of the actual questions (e.g., --Q1, --Question 1, --1)
+        // Supports optional leading whitespace, optional Q/Question, and handles number markers
+        const questionStartRegex = /^\s*--\s*(?:(?:Q|Question)\s*\d+|\d+(?:\s*[:.\-)]|\s*$))/im;
         const match = fullContent.match(questionStartRegex);
 
         let answersOnlyContent = fullContent;

@@ -199,11 +199,12 @@ export const splitMsSqlStatements = (sqlContent: string): QuestionBlock[] => {
 
   for (const line of lines) {
     const trimmedLine = line.trim();
-    const questionMatch = trimmedLine.match(/^--\s*(?:Q|Question)\s*(\d+)/i);
+    const questionMatch = trimmedLine.match(/^--\s*(?:(?:Q|Question)\s*(\d+)|(\d+)(?:\s*[:.\-)]|\s*$))/i);
 
     if (questionMatch) {
       processBuffer();
-      currentQuestionId = `Q${questionMatch[1]}`;
+      const qNum = questionMatch[1] || questionMatch[2];
+      currentQuestionId = `Q${qNum}`;
     } else {
       currentSqlBuffer.push(line);
     }
@@ -255,12 +256,36 @@ export async function gradeAssignmentLocally({
   const studentQuestionBlocks = studentSql ? splitMsSqlStatements(studentSql) : [];
   const modelQuestionBlocks = modelAnswersSql ? splitMsSqlStatements(modelAnswersSql) : [];
 
-  const results: EngineQueryResult[] = [];
-  const maxQuestionBlocks = Math.max(studentQuestionBlocks.length, modelQuestionBlocks.length);
+  const studentMap = new Map<string, QuestionBlock>();
+  for (const block of studentQuestionBlocks) {
+    studentMap.set(block.questionId, block);
+  }
 
-  for (let i = 0; i < maxQuestionBlocks; i++) {
-    const studentBlock = studentQuestionBlocks[i];
-    const modelBlock = modelQuestionBlocks[i];
+  const modelMap = new Map<string, QuestionBlock>();
+  for (const block of modelQuestionBlocks) {
+    modelMap.set(block.questionId, block);
+  }
+
+  // Determine standard question order (Q1 through Q14 from model answers)
+  const orderedQuestionIds: string[] = [];
+  for (const block of modelQuestionBlocks) {
+    if (!orderedQuestionIds.includes(block.questionId)) {
+      orderedQuestionIds.push(block.questionId);
+    }
+  }
+
+  // If student provided additional questions (e.g. Q15), append them at the end
+  for (const block of studentQuestionBlocks) {
+    if (!orderedQuestionIds.includes(block.questionId)) {
+      orderedQuestionIds.push(block.questionId);
+    }
+  }
+
+  const results: EngineQueryResult[] = [];
+
+  for (const questionId of orderedQuestionIds) {
+    const studentBlock = studentMap.get(questionId);
+    const modelBlock = modelMap.get(questionId);
 
     const studentResultsForQuestion: any[] = [];
     const modelResultsForQuestion: any[] = [];
@@ -280,7 +305,7 @@ export async function gradeAssignmentLocally({
     }
 
     results.push({
-      question: studentBlock?.questionId || modelBlock?.questionId || `Q${i + 1}`,
+      question: questionId,
       student: {
         sql: studentBlock?.fullSql || 'N/A',
         result: studentResultsForQuestion,
