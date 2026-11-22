@@ -8,7 +8,7 @@ import { modelAnswersSql } from "@/data/modelAnswersSql";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { showSuccess, showError } from "@/utils/toast";
-import { supabase } from "@/integrations/supabase/client";
+import { gradeAssignmentLocally } from "@/utils/sqlGradingEngine";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { markingSchedule } from "@/data/markingSchedule";
@@ -268,61 +268,33 @@ const AssignmentGrader = () => {
     setCopyButtonText("Copy to Clipboard"); // Reset copy button text
     
     try {
-      console.log("Calling edge function with payload sizes:", {
-        studentSqlLength: studentAnswersForGrading.length, // Use answers for grading
-        modelAnswersSqlLength: modelAnswersSql.length,
-        initialSqlSetupLength: initialSqlSetup.length
-      });
-      
-      const { data, error } = await supabase.functions.invoke('grade-assignment', {
-        body: {
-          studentSql: studentAnswersForGrading, // Pass only the extracted answers
-          modelAnswersSql,
-          initialSqlSetup, // This is the canonical setup from src/data/initialSqlSetup.ts
-        },
+      const data = await gradeAssignmentLocally({
+        studentSql: studentAnswersForGrading, // Pass only the extracted answers
+        modelAnswersSql,
+        initialSqlSetup, // This is the canonical setup from src/data/initialSqlSetup.ts
       });
 
-      if (error) {
-        console.error("Edge Function error:", error);
-        showError(`Grading failed: ${error.message}`);
-        // Still show results if we have them
-        if (data && data.results) {
-          setGradingResults(data.results);
-        } else {
-          setGradingResults([{
-            question: "Overall Grading Error",
-            student: {
-              sql: studentSql,
-              result: [{ error: error.message }] // Wrap in array for consistency
-            },
-            model: {
-              sql: modelAnswersSql,
-              result: [{ error: "N/A" }] // Wrap in array for consistency
-            }
-          }]);
-        }
-      } else {
-        showSuccess("Assignment graded successfully!");
-        const gradedResults = data.results.map((item: QueryResult) => {
-          // The edge function now returns question IDs in 'Q#' format, so no further normalization needed here.
-          const grade = calculateQuestionGrade(
-            item.question, // item.question should now be 'Q1', 'Q2', etc.
-            item.student.sql,
-            item.model.sql,
-            item.student.result,
-            item.model.result
-          );
-          return { ...item, grade };
-        });
-        setGradingResults(gradedResults);
+      showSuccess("Assignment graded successfully!");
+      const gradedResults = data.results.map((item: QueryResult) => {
+        // The engine returns question IDs in 'Q#' format, so no further normalization needed here.
+        const grade = calculateQuestionGrade(
+          item.question, // item.question should now be 'Q1', 'Q2', etc.
+          item.student.sql,
+          item.model.sql,
+          item.student.result,
+          item.model.result
+        );
+        return { ...item, grade };
+      });
+      setGradingResults(gradedResults);
 
-        // Calculate total score and generate Excel export text
-        let currentTotalScore = 0;
-        let currentTotalMaxScore = 0;
-        const excelIndividualMarksByQuestion: string[][] = [];
+      // Calculate total score and generate Excel export text
+      let currentTotalScore = 0;
+      let currentTotalMaxScore = 0;
+      const excelIndividualMarksByQuestion: string[][] = [];
 
-        gradedResults.forEach((item: QueryResult) => {
-          if (item.grade) {
+      gradedResults.forEach((item: QueryResult) => {
+        if (item.grade) {
             currentTotalMaxScore += item.grade.maxScore;
 
             const individualMarksForQuestion: string[] = [];
@@ -439,8 +411,6 @@ const AssignmentGrader = () => {
           .map(arr => arr.join('\n')) // Join individual marks within a question with newlines
           .join('\n\n\n\n'); // Join questions with FOUR newlines for three blank lines
         setExcelExportText(exportText);
-
-      }
     } catch (error: any) {
       console.error("Client-side grading error:", error);
       showError(`An unexpected error occurred: ${error.message}`);
