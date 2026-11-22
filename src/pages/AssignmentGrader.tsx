@@ -206,13 +206,24 @@ const AssignmentGrader = () => {
 
       if (declaredParamName && usedParamName) {
         if (usedParamName !== declaredParamName) {
-          const deduction = 0.5; 
-          score = Math.max(0, score - deduction); 
+          const deduction = 0.5;
+          score = Math.max(0, score - deduction);
           feedback.push(`-0.5 for parameter name mismatch: Declared '@${declaredParamName}' but used '@${usedParamName}' in WHERE clause.`);
         }
       } else {
         // These debug messages are helpful for understanding why the check might fail
         // feedback.push(`Debug: Q12 param check - Declared: ${declaredParamName}, Used: ${usedParamName}`);
+      }
+    }
+
+    // Check for missing '@' on cursor in questions that require a cursor (Q11, Q12, Q13)
+    if (['Q11', 'Q12', 'Q13'].includes(questionId)) {
+      const hasCursor = /(?:CURSOR\s+FOR|FETCH\s+NEXT\s+FROM\s+\w+|OPEN\s+\w+)/i.test(studentSql);
+      const usesAtForCursor = /(?:DECLARE\s+@\w+\s+(?:AS\s+)?CURSOR|SET\s+@\w+\s*=\s*CURSOR|OPEN\s+@\w+|FETCH\s+NEXT\s+FROM\s+@\w+)/i.test(studentSql);
+      if (hasCursor && !usesAtForCursor) {
+        const deduction = 1.0;
+        score = Math.max(0, score - deduction);
+        feedback.push(`-1 for missing '@' prefix on cursor name (cursor should use '@' prefix).`);
       }
     }
 
@@ -394,6 +405,17 @@ const AssignmentGrader = () => {
                   questionActualScoreSum = Math.max(0, questionActualScoreSum - deduction);
                   // Ensure deduction is also formatted correctly
                   individualMarksForQuestion.push(`-${parseFloat(deduction.toFixed(2)).toString()}`); // Add the deduction as a separate line
+                }
+              }
+
+              // Check for missing '@' on cursor in questions that require a cursor (Q11, Q12, Q13)
+              if (['Q11', 'Q12', 'Q13'].includes(questionId)) {
+                const hasCursor = /(?:CURSOR\s+FOR|FETCH\s+NEXT\s+FROM\s+\w+|OPEN\s+\w+)/i.test(studentSqlForEvaluation);
+                const usesAtForCursor = /(?:DECLARE\s+@\w+\s+(?:AS\s+)?CURSOR|SET\s+@\w+\s*=\s*CURSOR|OPEN\s+@\w+|FETCH\s+NEXT\s+FROM\s+@\w+)/i.test(studentSqlForEvaluation);
+                if (hasCursor && !usesAtForCursor) {
+                  const deduction = 1.0;
+                  questionActualScoreSum = Math.max(0, questionActualScoreSum - deduction);
+                  individualMarksForQuestion.push(`-${parseFloat(deduction.toFixed(2)).toString()}`); // Add the deduction as a separate line in Excel export
                 }
               }
             }
