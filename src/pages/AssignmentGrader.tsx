@@ -525,7 +525,7 @@ const AssignmentGrader = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">SQL Assignment 2 Grader</h1>
+      <h1 className="text-4xl font-bold text-center mb-8">Data Modelling and SQL: Assignment 2 Grader</h1>
       
       <Card>
         <CardHeader>
