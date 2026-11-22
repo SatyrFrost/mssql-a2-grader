@@ -72,19 +72,19 @@ export const markingSchedule: {
   "Q11": {
     "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+(?:PROCEDURE|PROC)\\s+CustomerDetails", weight: 0.5 },
     "REGEX::PARAM_CID_TYPE": { regex: "@\\w+\\s+(?:AS\\s+)?(?:INT|VARCHAR\\((?:\\d+|MAX)\\))", weight: 0.5 },
-    "REGEX::DECLARE_CFiN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(FirstName|CFiN|cfi)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
-    "REGEX::DECLARE_CFaN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(FamilyName|CFaN|cfa)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
-    "REGEX::DECLARE_CA1_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address1|A1|CA1|adr)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
-    "REGEX::DECLARE_CA2_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address2|A2|CA2)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
-    "REGEX::DECLARE_CA3_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address3|A3|CA3)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
-    "REGEX::DECLARE_Ph_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Phone|Ph|pho)\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)\\(\\d+\\)", weight: 0.5 },
+    "REGEX::DECLARE_CFiN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(FirstName|CFiN|cfi|CFname|Fname|first|FiN)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)(?:\\(\\d+\\))?", weight: 0.5 },
+    "REGEX::DECLARE_CFaN_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(FamilyName|CFaN|cfa|CFamname|Famname|Lname|LastName|sur|FaN)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)(?:\\(\\d+\\))?", weight: 0.5 },
+    "REGEX::DECLARE_CA1_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address1|A1|CA1|adr1?|Cadd1|addr1|add1)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)(?:\\(\\d+\\))?", weight: 0.5 },
+    "REGEX::DECLARE_CA2_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address2|A2|CA2|adr2?|Cadd2|addr2|add2)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)(?:\\(\\d+\\))?", weight: 0.5 },
+    "REGEX::DECLARE_CA3_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Address3|A3|CA3|adr3?|Cadd3|addr3|add3)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR)(?:\\(\\d+\\))?", weight: 0.5 },
+    "REGEX::DECLARE_Ph_VARCHAR": { regex: "(?:DECLARE|declare)\\s+@(Phone|Ph|pho|CP|CPhone)\\w*\\s+(?:AS\\s+)?(?:VARCHAR|CHAR|INT)(?:\\(\\d+\\))?", weight: 0.5 },
     "REGEX::SELECT_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\bPhone\\b)(?=[^;]*\\bFirstName\\b)(?=[^;]*\\bFamilyName\\b)(?=[^;]*\\bAddress1\\b)(?=[^;]*\\bAddress2\\b)(?=[^;]*\\bAddress3).*?FROM", weight: 0.5 },
     "REGEX::FROM_CUSTOMER": { regex: "FROM\\s+Customer", weight: 0.5 },
     "REGEX::WHERE_CID": { regex: "WHERE\\s+(?:\\w+\\.)?CustomerID\\s*=\\s*@\\w+", weight: 0.5 },
     "REGEX::FETCH_NEXT_COUNT_Q11": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){5,6}", weight: 1.0 },
     "REGEX::PRINT_DETAILS_HEADER": { regex: "(?:PRINT|print)\\s+'CUSTOMER\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_1": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
-    "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'Customer ID:\\s*'\\s*\\+\\s*(?:(?:CONVERT|convert)\\s*\\(\\s*(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*,\\s*@\\w+\\s*\\)|(?:CAST|cast)\\s*\\(\\s*@\\w+\\s+AS\\s+(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*\\)|@\\w+)\\s*\\+\\s*'\\s*Phone:\\s*'\\s*\\+\\s*@\\w+", weight: 1.0 },
+    "REGEX::PRINT_CID_PHONE": { regex: "(?:PRINT|print)\\s+'Customer ID:\\s*'\\s*\\+\\s*(?:(?:CONVERT|convert)\\s*\\(\\s*(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*,\\s*@\\w+\\s*\\)|(?:CAST|cast)\\s*\\(\\s*@\\w+\\s+AS\\s+(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*\\)|@\\w+)(?:\\s*\\+\\s*'\\s*')*\\s*\\+\\s*'\\s*Phone:\\s*'\\s*\\+\\s*(?:(?:CONVERT|convert)\\s*\\(\\s*(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*,\\s*@\\w+\\s*\\)|(?:CAST|cast)\\s*\\(\\s*@\\w+\\s+AS\\s+(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*\\)|@\\w+)", weight: 1.0 },
     "REGEX::PRINT_NAME": { regex: "(?:PRINT|print)\\s+'(?:Customer\\s+Name|CustomerName):\\s*'(?:\\s*\\+\\s*@\\w+)\\s*\\+?\\s*'(?:\\s*)?'?\\s*\\+\\s*@\\w+(?:;)?", weight: 0.5 },
     "REGEX::PRINT_ADDRESS": { regex: "(?:PRINT|print)\\s+'(?:Address|CUSTOMER\\s+ADDRESS):\\s*'(?:\\s*\\+\\s*@\\w+)(?:\\s*\\+\\s*',\\s*'\\s*\\+\\s*@\\w+){2}(?:;)?", weight: 0.5 },
     "REGEX::EXEC_CUSTOMER_DETAILS": { regex: "EXEC\\s+CustomerDetails\\s+(?:@\\w+\\s*=\\s*)?(?:\\d+|'\\d+')", weight: 0.5 }
@@ -109,12 +109,12 @@ export const markingSchedule: {
   "Q13": {
     "REGEX::CREATE_PROCEDURE_HEADER": { regex: "CREATE\\s+(?:PROCEDURE|PROC)\\s+(?:SalespersonDetails|GetSalespersonDetails)", weight: 0.5 },
     "REGEX::PARAM_SPID_TYPE": { regex: "@\\w+\\s+(?:AS\\s+)?(?:VARCHAR\\(20\\)|INT)", weight: 0.5 },
-    "REGEX::DECLARE_ALL_VARS_Q13": { regex: "(?=(?:.*DECLARE\\s+@\\w+\\s+(?:AS\\s+)?VARCHAR\\((?:10|20|50|100)\\)){3})", weight: 1.5 },
+    "REGEX::DECLARE_ALL_VARS_Q13": { regex: "(?:DECLARE\\s+@\\w+\\s+(?:AS\\s+)?(?:VARCHAR\\((?:\\d+|MAX)\\)|CHAR\\(\\d+\\)|INT)[^;]*;?\\s*){3}", weight: 1.5 },
     "REGEX::SELECT_SP_COLUMNS": { regex: "SELECT\\s*(?=[^;]*\\b(?:Salesperson\\.)?Phone\\b)(?=[^;]*\\b(?:Salesperson\\.)?FirstName\\b)(?=[^;]*\\b(?:Salesperson\\.)?FamilyName\\b)", weight: 1.5 },
     "REGEX::FROM_SALESPERSON": { regex: "FROM\\s+Salesperson(?:\\s+\\w+)?", weight: 0.5 },
     "REGEX::WHERE_SALESPERSONID_SPID": { regex: "WHERE\\s+(?:\\w+\\.)?SalespersonID\\s*=\\s*@\\w+", weight: 1.0 },
     "REGEX::FETCH_NEXT_COUNT_Q13": { regex: "FETCH\\s+NEXT\\s+FROM\\s+@?\\w+\\s+INTO\\s+@\\w+(?:\\s*,\\s*@\\w+){2,4}", weight: 1.0 },
-    "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'(?:Sal(?:e|a)person\\s+Details|SALESPERSON\\s+DETAILS)(?:\\s*:)?'", weight: 0.5 },
+    "REGEX::PRINT_DETAILS_HEADER_Q13": { regex: "(?:PRINT|print)\\s+'(?:Sal(?:e|a)person|Slesperson|SALESPERSON)\\s+DETAILS(?:\\s*:)?'", weight: 0.5 },
     "REGEX::PRINT_EMPTY_LINE_Q13": { regex: "(?:PRINT|print)\\s+''|(?:PRINT|print)\\s+'\\s*'", weight: 0.5 },
     "REGEX::PRINT_SPID_PHONE_Q13": { regex: "(?:PRINT|print)\\s*(?=[^;]*\\b(?:Salesperson\\s+ID|SalespersonID)(?:\\s*:)?)(?=[^;]*@\\w+)(?=[^;]*\\b(?:Phone|phone)(?:\\s*:)?)(?=[^;]*@\\w+)", weight: 1.0 },
     "REGEX::PRINT_SP_NAME_Q13": { regex: "(?:PRINT|print)\\s*(?=[^;]*\\b(?:Name|NAME)(?:\\s*:)?)(?=[^;]*@\\w+)(?=[^;]*@\\w+)", weight: 0.5 },
@@ -122,12 +122,12 @@ export const markingSchedule: {
   },
   "Q14": {
     "REGEX::CREATE_FUNCTION_HEADER": { regex: "CREATE\\s+FUNCTION\\s+KmToMiles\\s*\\(", weight: 1.0 },
-    "REGEX::FUNCTION_PARAM_TYPE": { regex: "@km\\s+(?:AS\\s+)?(?:INT|FLOAT)\\s*\\)", weight: 1.0 },
-    "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+FLOAT", weight: 1.0 },
+    "REGEX::FUNCTION_PARAM_TYPE": { regex: "@\\w+\\s+(?:AS\\s+)?(?:INT|FLOAT)\\s*\\)", weight: 1.0 },
+    "REGEX::RETURNS_FLOAT": { regex: "RETURNS\\s+(?:FLOAT|REAL|DECIMAL(?:\\(\\d+,\\d+\\))?|VARCHAR(?:\\(\\d+\\))?)", weight: 1.0 },
     "REGEX::AS_KEYWORD": { regex: "AS", weight: 1.0 },
     "REGEX::BEGIN_KEYWORD": { regex: "BEGIN", weight: 1.0 },
-    "REGEX::RETURN_CALCULATION": { regex: "(?:RETURN\\s+@km\\s*\\*\\s*0\\.62|SET\\s+@\\w+\\s*=\\s*(?:ROUND\\s*\\(\\s*)?@km\\s*\\*\\s*0\\.62(?:,\\s*\\d+\\s*\\))?;\\s*RETURN\\s+@\\w+)", weight: 2.0 },
+    "REGEX::RETURN_CALCULATION": { regex: "(?:RETURN\\s+.*@\\w+\\s*\\*\\s*0\\.62|SET\\s+@\\w+\\s*=\\s*(?:ROUND\\s*\\(\\s*)?@\\w+\\s*\\*\\s*0\\.62(?:,\\s*\\d+\\s*\\))?;\\s*RETURN\\s+@\\w+)", weight: 2.0 },
     "REGEX::END_KEYWORD": { regex: "END", weight: 1.0 },
-    "REGEX::PRINT_MILEAGE_CALCULATION": { regex: "(?:PRINT|print)\\s+.*?Mileage:\\s*'.*?(?:(?:CONVERT|convert)\\s*\\(\\s*(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*,\\s*(?:dbo\\.KmToMiles\\(@\\w+\\)|@\\w+)\\s*\\)|(?:CAST|cast)\\s*\\(\\s*(?:dbo\\.KmToMiles\\(@\\w+\\)|@\\w+)\\s+AS\\s+(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*\\)|@\\w+)\\s*\\+\\s*'(?:\\s*)?miles'", weight: 2.0 }
+    "REGEX::PRINT_MILEAGE_CALCULATION": { regex: "(?:PRINT|print)\\s+.*?Mileage:\\s*'.*?(?:(?:CONVERT|convert)\\s*\\(\\s*(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*,\\s*(?:(?:dbo\\.)?KmToMiles\\(@\\w+\\)|@\\w+)\\s*\\)|(?:CAST|cast)\\s*\\(\\s*(?:(?:dbo\\.)?KmToMiles\\(@\\w+\\)|@\\w+)\\s+AS\\s+(?:VARCHAR|CHAR)(?:\\((?:\\d+|MAX)\\))?\\s*\\)|(?:dbo\\.)?KmToMiles\\(@\\w+\\)|@\\w+)\\s*\\+\\s*'(?:\\s*)?(?:miles|Miles)'", weight: 2.0 }
   }
 };
