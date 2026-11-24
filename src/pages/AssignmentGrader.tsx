@@ -526,6 +526,18 @@ const AssignmentGrader = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 md:p-8">
       <h1 className="text-4xl font-bold text-center mb-8">Data Modelling and SQL: Assignment 2 Grader</h1>
+
+      <div className="flex flex-col items-center justify-between gap-4 rounded-lg border bg-muted/30 p-4 sm:flex-row">
+        <div>
+          <h2 className="font-semibold">Platform User Manual</h2>
+          <p className="text-sm text-muted-foreground">Download the Assignment 2 platform guide as a Word document.</p>
+        </div>
+        <Button asChild variant="outline" className="shrink-0">
+          <a href="/assignment-2-user-manual.docx" download="Data Modelling and SQL - Assignment 2 Platform User Manual.docx">
+            Download User Manual (.docx)
+          </a>
+        </Button>
+      </div>
       
       <Card>
         <CardHeader>
