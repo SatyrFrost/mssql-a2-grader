@@ -533,7 +533,7 @@ const AssignmentGrader = () => {
           <p className="text-sm text-muted-foreground">Download the Assignment 2 platform guide as a Word document.</p>
         </div>
         <Button asChild variant="outline" className="shrink-0">
-          <a href="/assignment-2-user-manual.docx" download="Data Modelling and SQL - Assignment 2 Platform User Manual.docx">
+          <a href="/Data%20Modelling%20and%20SQL%20-%20Assignment%202%20Platform%20User%20Manual.docx" download="Data Modelling and SQL - Assignment 2 Platform User Manual.docx">
             Download User Manual (.docx)
           </a>
         </Button>
